@@ -5,14 +5,40 @@
     android:id="@+id/container"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:paddingBottom="16dp"
+    android:paddingLeft="10dp"
+    android:paddingRight="10dp"
+    android:paddingTop="16dp"
     tools:context=".WatchActivity"
     tools:deviceIds="wear">
 
     <TextView
-        android:id="@+id/text"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="Darragh's Application"
+        android:id="@+id/dist"
+        android:layout_width="33pt"
+        android:layout_height="19pt"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:text="Distance Information"
+        app:layout_box="all" />
+
+    <TextView
+        android:id="@+id/speed"
+        android:layout_width="33pt"
+        android:layout_height="19pt"
+        android:layout_gravity="top|end"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:text="Speed Information"
+        app:layout_box="all" />
+
+    <TextView
+        android:id="@+id/time"
+        android:layout_width="38pt"
+        android:layout_height="19pt"
+        android:layout_gravity="center|center"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:text="Time Information"
         app:layout_box="all" />
 
     <TextView

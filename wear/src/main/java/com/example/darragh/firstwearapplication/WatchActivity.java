@@ -26,7 +26,7 @@ public class WatchActivity extends WearableActivity {
         setAmbientEnabled();
 
         mContainerView = (BoxInsetLayout) findViewById(R.id.container);
-        mTextView = (TextView) findViewById(R.id.text);
+        mTextView = (TextView) findViewById(R.id.dist);
         mClockView = (TextView) findViewById(R.id.clock);
     }
 
