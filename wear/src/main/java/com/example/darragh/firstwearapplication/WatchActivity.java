@@ -1,26 +1,30 @@
 package com.example.darragh.firstwearapplication;
 
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
+import android.location.Location;
 import android.os.Bundle;
-import android.support.v4.content.LocalBroadcastManager;
 import android.support.wearable.activity.WearableActivity;
 import android.support.wearable.view.BoxInsetLayout;
 import android.support.wearable.view.WatchViewStub;
-import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
+
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationListener;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationServices;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
+import java.util.concurrent.TimeUnit;
 
-public class WatchActivity extends WearableActivity {
+public class WatchActivity extends WearableActivity implements GoogleApiClient.ConnectionCallbacks,
+        GoogleApiClient.OnConnectionFailedListener,
+        LocationListener  {
 
     private static final SimpleDateFormat AMBIENT_DATE_FORMAT =
-            new SimpleDateFormat("HH:mm", Locale.US);
+            new SimpleDateFormat("HH:mm", Locale.UK);
 
     private BoxInsetLayout mContainerView;
     private TextView mTextView;
@@ -30,11 +34,6 @@ public class WatchActivity extends WearableActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_watch);
-        setAmbientEnabled();
-
-        //mContainerView = (BoxInsetLayout) findViewById(R.id.container);
-        //mTextView = (TextView) findViewById(R.id.dist);
-        //mClockView = (TextView) findViewById(R.id.clock);
         final WatchViewStub stub = (WatchViewStub) findViewById(R.id.watch_view_stub);
         stub.setOnLayoutInflatedListener(new WatchViewStub.OnLayoutInflatedListener() {
             @Override
@@ -44,21 +43,67 @@ public class WatchActivity extends WearableActivity {
         });
 
         setAmbientEnabled();
-
-        // Register the local broadcast receiver
-        IntentFilter messageFilter = new IntentFilter(Intent.ACTION_SEND);
-        MessageReceiver messageReceiver = new MessageReceiver();
-        LocalBroadcastManager.getInstance(this).registerReceiver(messageReceiver, messageFilter);
     }
 
-    public class MessageReceiver extends BroadcastReceiver {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            String message = intent.getStringExtra("message");
-            Log.v("myTag", "Main activity received message: " + message);
-            // Display message in UI
-            mTextView.setText(message);
+    GoogleApiClient googleApiClient;
+
+    // Connect to Google Play Services when the Activity starts
+    @Override
+    protected void onStart() {
+        super.onStart();
+        if (googleApiClient == null) {
+            googleApiClient = new GoogleApiClient.Builder(this)
+                    .addApi(LocationServices.API)
+                    .addConnectionCallbacks(this)
+                    .addOnConnectionFailedListener(this)
+                    .build();
         }
+        googleApiClient.connect();
+    }
+
+    // Register as a listener when connected
+    @Override
+    public void onConnected(Bundle connectionHint) {
+
+        // Create the LocationRequest object
+        LocationRequest locationRequest = LocationRequest.create();
+        // Use high accuracy
+        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        // Set the update interval to 2 seconds
+        locationRequest.setInterval(TimeUnit.SECONDS.toMillis(2));
+        // Set the fastest update interval to 2 seconds
+        locationRequest.setFastestInterval(TimeUnit.SECONDS.toMillis(2));
+        // Set the minimum displacement
+        locationRequest.setSmallestDisplacement(2);
+
+        // Register listener using the LocationRequest object
+        LocationServices.FusedLocationApi.requestLocationUpdates(googleApiClient, locationRequest, this);
+    }
+
+    // Disconnect from Google Play Services when the Activity stops
+    @Override
+    protected void onStop() {
+
+        if (googleApiClient.isConnected()) {
+            LocationServices.FusedLocationApi.removeLocationUpdates(googleApiClient, this);
+            googleApiClient.disconnect();
+        }
+        super.onStop();
+    }
+
+    // Placeholders for required connection callbacks
+    @Override
+    public void onConnectionSuspended(int cause) { }
+
+    @Override
+    public void onConnectionFailed(ConnectionResult connectionResult) { }
+
+    @Override
+    public void onLocationChanged(Location location){
+
+        // Display the latitude and longitude in the UI
+        mTextView.setText("Latitude:  " + String.valueOf( location.getLatitude()) +
+                "\nLongitude:  " + String.valueOf( location.getLongitude()));
     }
 
     @Override

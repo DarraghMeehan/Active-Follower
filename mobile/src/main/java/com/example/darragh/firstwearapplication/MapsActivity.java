@@ -12,7 +12,6 @@ import android.os.Bundle;
 import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
-import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 import android.widget.Toast;
@@ -28,9 +27,6 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
-import com.google.android.gms.wearable.MessageApi;
-import com.google.android.gms.wearable.Node;
-import com.google.android.gms.wearable.NodeApi;
 import com.google.android.gms.wearable.Wearable;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback,
@@ -136,7 +132,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void onConnected(Bundle connectionHint) {
         String message = "Hello wearable\n Via the data layer";
         //Requires a new thread to avoid blocking the UI
-        new SendToDataLayerThread("/message_path", message).start();
     }
 
     // Disconnect from the data layer when the Activity stops
@@ -179,30 +174,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         map.setMapType(GoogleMap.MAP_TYPE_NORMAL);
         CameraUpdate update = CameraUpdateFactory.newLatLngZoom(LOCATION_DUBLIN, 16);
         map.animateCamera(update);
-    }
-
-    class SendToDataLayerThread extends Thread {
-        String path;
-        String message;
-
-        // Constructor to send a message to the data layer
-        SendToDataLayerThread(String p, String msg) {
-            path = p;
-            message = msg;
-        }
-
-        public void run() {
-            NodeApi.GetConnectedNodesResult nodes = Wearable.NodeApi.getConnectedNodes(googleClient).await();
-            for (Node node : nodes.getNodes()) {
-                MessageApi.SendMessageResult result = Wearable.MessageApi.sendMessage(googleClient, node.getId(), path, message.getBytes()).await();
-                if (result.getStatus().isSuccess()) {
-                    Log.v("myTag", "Message: {" + message + "} sent to: " + node.getDisplayName());
-                } else {
-                    // Log an error
-                    Log.v("myTag", "ERROR: failed to send Message");
-                }
-            }
-        }
     }
 
     /**
