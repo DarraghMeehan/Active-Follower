@@ -16,7 +16,6 @@ import android.view.Menu;
 import android.view.View;
 import android.widget.Toast;
 
-import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -26,38 +25,30 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
-import com.google.android.gms.wearable.Wearable;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
+    //Location Variables
     private final LatLng LOCATION_DUBLIN = new LatLng(53.359673, -6.317403);
-
     private double longitude;
     private double latitude;
 
     private static LatLng prev;
     private int flag=0;
 
+    //Map & map manipulation
     private GoogleMap map;
     private LocationManager locationManager;
     private LocationListener locationListener;
 
-    GoogleApiClient googleClient;
+    //GoogleApiClient googleClient;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_phone);
 
-        // Build a new GoogleApiClient for the Wearable API
-        googleClient = new GoogleApiClient.Builder(this)
-                .addApi(Wearable.API)
-                .addConnectionCallbacks(this)
-                .addOnConnectionFailedListener(this)
-                .build();
-
         map = ((MapFragment) getFragmentManager().findFragmentById(R.id.map)).getMap();
-        //map.addMarker(new MarkerOptions().position(LOCATION_DUBLIN).title("Find me here!"));
 
         //Calling the Location Service
         locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
@@ -66,10 +57,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             @Override
             public void onLocationChanged(Location location) {
 
+                //Update Location variables
                 latitude = location.getLatitude();
                 longitude = location.getLongitude();
-
-                LatLng current = new LatLng(location.getLatitude(), location.getLongitude());
+                LatLng current = new LatLng(latitude, longitude);
 
                 if(flag == 0)  //when the first update comes, we have no previous points,hence this
                 {
@@ -99,8 +90,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             @Override
             public void onProviderDisabled(String provider) {
 
-                Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-                startActivity(intent);
+                //Enable Location service via an intent
+                Intent locationIntent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                startActivity(locationIntent);
             }
         };
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
