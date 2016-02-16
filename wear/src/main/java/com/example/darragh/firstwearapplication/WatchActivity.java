@@ -1,10 +1,16 @@
 package com.example.darragh.firstwearapplication;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.location.Location;
 import android.os.Bundle;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.wearable.activity.WearableActivity;
 import android.support.wearable.view.BoxInsetLayout;
 import android.support.wearable.view.WatchViewStub;
+import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
@@ -13,7 +19,9 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.wearable.MessageEvent;
 import com.google.android.gms.wearable.Wearable;
+import com.google.android.gms.wearable.WearableListenerService;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -32,6 +40,26 @@ public class WatchActivity extends WearableActivity implements
     private TextView mTextView;
     private TextView mClockView;
 
+    /*@Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_watch);
+        final WatchViewStub stub = (WatchViewStub) findViewById(R.id.watch_view_stub);
+
+        // Register the local broadcast receiver, defined in step 3.
+        IntentFilter messageFilter = new IntentFilter(Intent.ACTION_SEND);
+        MessageReceiver messageReceiver = new MessageReceiver();
+        LocalBroadcastManager.getInstance(this).registerReceiver(messageReceiver, messageFilter);
+        stub.setOnLayoutInflatedListener(new WatchViewStub.OnLayoutInflatedListener() {
+            @Override
+            public void onLayoutInflated(WatchViewStub stub) {
+                mTextView = (TextView) stub.findViewById(R.id.text);
+            }
+        });
+
+        setAmbientEnabled();
+    }*/
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -45,6 +73,11 @@ public class WatchActivity extends WearableActivity implements
         });
 
         setAmbientEnabled();
+
+        // Register the local broadcast receiver
+        IntentFilter messageFilter = new IntentFilter(Intent.ACTION_SEND);
+        MessageReceiver messageReceiver = new MessageReceiver();
+        LocalBroadcastManager.getInstance(this).registerReceiver(messageReceiver, messageFilter);
     }
 
     GoogleApiClient googleApiClient;
@@ -105,8 +138,8 @@ public class WatchActivity extends WearableActivity implements
     public void onLocationChanged(Location location){
 
         // Display the latitude and longitude in the UI
-        mTextView.setText("Latitude:  " + String.valueOf( location.getLatitude()) +
-                "\nLongitude:  " + String.valueOf( location.getLongitude()));
+        mTextView.setText("Latitude:  " + String.valueOf(location.getLatitude()) +
+                "\nLongitude:  " + String.valueOf(location.getLongitude()));
     }
 
     @Override
@@ -127,6 +160,30 @@ public class WatchActivity extends WearableActivity implements
         super.onExitAmbient();
     }
 
+    public class ListenerService extends WearableListenerService {
+
+        @Override
+        public void onMessageReceived(MessageEvent messageEvent) {
+
+            if (messageEvent.getPath().equals("/message_path")) {
+                final String message = new String(messageEvent.getData());
+                Log.v("myTag", "Message path received on watch is: " + messageEvent.getPath());
+                Log.v("myTag", "Message received on watch is: " + message);
+            } else {
+                super.onMessageReceived(messageEvent);
+            }
+        }
+    }
+
+    public class MessageReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String message = intent.getStringExtra("message");
+            Log.v("myTag", "Main activity received message: " + message);
+            // Display message in UI
+            mTextView.setText(message);
+        }
+    }
     private void updateDisplay() {
         if (isAmbient()) {
             mContainerView.setBackgroundColor(getResources().getColor(android.R.color.black));
