@@ -13,13 +13,15 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.wearable.Wearable;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
-public class WatchActivity extends WearableActivity implements GoogleApiClient.ConnectionCallbacks,
+public class WatchActivity extends WearableActivity implements
+        GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener,
         LocationListener  {
 
@@ -53,6 +55,7 @@ public class WatchActivity extends WearableActivity implements GoogleApiClient.C
         super.onStart();
         if (googleApiClient == null) {
             googleApiClient = new GoogleApiClient.Builder(this)
+                    .addApi(Wearable.API)
                     .addApi(LocationServices.API)
                     .addConnectionCallbacks(this)
                     .addOnConnectionFailedListener(this)
