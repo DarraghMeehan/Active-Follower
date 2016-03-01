@@ -140,7 +140,7 @@ public class WatchActivity extends WearableActivity implements
     public void onLocationChanged(Location location){
 
         // Display the latitude and longitude in the UI
-        mTextView.setText("Latitude:  " + String.valueOf(location.getLatitude()) +
+        speed.setText("Latitude:  " + String.valueOf(location.getLatitude()) +
                 "\nLongitude:  " + String.valueOf(location.getLongitude()));
     }
 
