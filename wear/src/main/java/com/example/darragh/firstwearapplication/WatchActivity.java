@@ -38,6 +38,7 @@ public class WatchActivity extends WearableActivity implements
 
     private BoxInsetLayout mContainerView;
     private TextView mTextView;
+    private TextView speed;
     private TextView mClockView;
 
     /*@Override
@@ -68,7 +69,8 @@ public class WatchActivity extends WearableActivity implements
         stub.setOnLayoutInflatedListener(new WatchViewStub.OnLayoutInflatedListener() {
             @Override
             public void onLayoutInflated(WatchViewStub stub) {
-                mTextView = (TextView) stub.findViewById(R.id.text);
+                //mTextView = (TextView) stub.findViewById(R.id.text);
+                speed = (TextView) stub.findViewById(R.id.text);
             }
         });
 

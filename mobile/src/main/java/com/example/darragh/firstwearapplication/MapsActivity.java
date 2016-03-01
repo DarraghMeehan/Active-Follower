@@ -39,7 +39,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         GoogleApiClient.OnConnectionFailedListener{
 
     //Location Variables
-    private final LatLng LOCATION_DUBLIN = new LatLng(53.359673, -6.317403);
+    //private final LatLng LOCATION_DUBLIN = new LatLng(53.359673, -6.317403);
     private double longitude;
     private double latitude;
 
@@ -189,7 +189,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
     }
 
-    public void onClick_Find(View v) {
+    public void onClick_Start(View v) {
 
         map.setMapType(GoogleMap.MAP_TYPE_NORMAL);
         LatLng MY_LOCATION = new LatLng(latitude, longitude);
@@ -202,9 +202,19 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     public void onClick_Track(View v) {
+
         map.setMapType(GoogleMap.MAP_TYPE_NORMAL);
-        CameraUpdate update = CameraUpdateFactory.newLatLngZoom(LOCATION_DUBLIN, 16);
+        LatLng MY_LOCATION = new LatLng(latitude, longitude);
+        CameraUpdate update = CameraUpdateFactory.newLatLngZoom(MY_LOCATION, 17);
+
+        map.addMarker(new MarkerOptions().position(MY_LOCATION)
+                .icon(BitmapDescriptorFactory
+                        .defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
         map.animateCamera(update);
+
+        /*map.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+        CameraUpdate update = CameraUpdateFactory.newLatLngZoom(LOCATION_DUBLIN, 16);
+        map.animateCamera(update);*/
     }
 
     /**

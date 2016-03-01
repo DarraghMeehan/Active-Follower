@@ -15,10 +15,10 @@ tools:context=".MapsActivity" >
     android:id="@+id/btnTrack"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:layout_alignParentRight="true"
+    android:layout_alignParentLeft="true"
     android:layout_alignParentTop="true"
     android:onClick="onClick_Track"
-    android:text="Track Me" />
+    android:text="Find Me" />
 
 
 <fragment
@@ -30,12 +30,12 @@ tools:context=".MapsActivity" >
     />
 
 <Button
-    android:id="@+id/btnFind"
+    android:id="@+id/btnStart"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:layout_alignParentLeft="true"
+    android:layout_alignParentRight="true"
     android:layout_alignParentTop="true"
-    android:onClick="onClick_Find"
-    android:text="Find Me" />
+    android:onClick="onClick_Start"
+    android:text="Start" />
 
 </RelativeLayout>
