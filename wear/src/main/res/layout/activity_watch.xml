@@ -4,6 +4,6 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools" android:id="@+id/watch_view_stub"
     android:layout_width="match_parent" android:layout_height="match_parent"
-    app:rectLayout="@layout/rectangle_layout"
+    app:rectLayout="@layout/my_rect_layout"
     app:roundLayout="@layout/round_layout" tools:context=".MainWearActivity"
     tools:deviceIds="wear"></android.support.wearable.view.WatchViewStub>
