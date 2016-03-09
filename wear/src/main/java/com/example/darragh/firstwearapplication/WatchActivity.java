@@ -31,6 +31,8 @@ public class WatchActivity extends WearableActivity implements
     private BoxInsetLayout mContainerView;
     private TextView mTextView;
     private TextView speed;
+    private TextView distance;
+    private TextView runTime;
     private TextView mClockView;
     GoogleApiClient googleApiClient;
 
@@ -44,6 +46,8 @@ public class WatchActivity extends WearableActivity implements
             public void onLayoutInflated(WatchViewStub stub) {
                 //mTextView = (TextView) stub.findViewById(R.id.text);
                 speed = (TextView) stub.findViewById(R.id.speed);
+                distance = (TextView) stub.findViewById(R.id.distance);
+                runTime = (TextView) stub.findViewById(R.id.runTime);
             }
         });
         setAmbientEnabled();
@@ -68,16 +72,12 @@ public class WatchActivity extends WearableActivity implements
     @Override
     public void onConnected(Bundle connectionHint) {
 
-        // Create the LocationRequest object
-        LocationRequest locationRequest = LocationRequest.create();
-        // Use high accuracy
-        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-        // Set the update interval to 2 seconds
-        locationRequest.setInterval(TimeUnit.SECONDS.toMillis(2));
-        // Set the fastest update interval to 2 seconds
-        locationRequest.setFastestInterval(TimeUnit.SECONDS.toMillis(2));
-        // Set the minimum displacement
-        locationRequest.setSmallestDisplacement(2);
+        runTime.setText("Time 0");
+        LocationRequest locationRequest = LocationRequest.create(); // Create the LocationRequest object
+        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY); // Use high accuracy
+        locationRequest.setInterval(TimeUnit.SECONDS.toMillis(2)); // Set the update interval to 2 seconds
+        locationRequest.setFastestInterval(TimeUnit.SECONDS.toMillis(2)); // Set the fastest update interval to 2 seconds
+        locationRequest.setSmallestDisplacement(2); // Set the minimum displacement
         // Register listener using the LocationRequest object
         LocationServices.FusedLocationApi.requestLocationUpdates(googleApiClient, locationRequest, this);
     }
