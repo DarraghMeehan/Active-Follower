@@ -15,6 +15,7 @@ import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.wearable.Wearable;
 
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
@@ -34,6 +35,7 @@ public class WatchActivity extends WearableActivity implements
     private TextView distance;
     private TextView runTime;
     private TextView mClockView;
+    double mySpeed;
     GoogleApiClient googleApiClient;
 
     @Override
@@ -106,9 +108,12 @@ public class WatchActivity extends WearableActivity implements
     public void onLocationChanged(Location location){
 
         // Display the latitude and longitude in the UI
-        speed.setText("Latitude:  " + String.valueOf(location.getLatitude()) +
-                "\nLongitude:  " + String.valueOf(location.getLongitude()));
-        //speed.setText("Location Changed");
+        mySpeed = location.getSpeed();
+        DecimalFormat formatter = new DecimalFormat("##.##");
+        String s = formatter.format(mySpeed);
+        //speed.setText("Latitude:  " + String.valueOf(location.getLatitude()) +
+           //     "\nLongitude:  " + String.valueOf(location.getLongitude()));
+        speed.setText(s + "m/s");
     }
 
     @Override
