@@ -43,7 +43,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         GoogleApiClient.OnConnectionFailedListener{
 
     //Location Variables
-    //private final LatLng LOCATION_DUBLIN = new LatLng(53.359673, -6.317403);
     private double longitude;
     private double latitude;
 
