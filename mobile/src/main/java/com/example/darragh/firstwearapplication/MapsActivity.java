@@ -86,6 +86,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 longitude = location.getLongitude();
                 LatLng current = new LatLng(latitude, longitude);
 
+                //Barcode.GeoPoint New_geopoint =
+                  //      new Barcode.GeoPoint(latitude * 1e6, longitude * 1e6);
+
                 if(flag == 0)  //when the first update comes, we have no previous points,hence this
                 {
                     prev = current;
@@ -205,6 +208,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 .icon(BitmapDescriptorFactory
                         .defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
         map.animateCamera(update);
+
+        String message = "Hit the start button";
+        //Requires a new thread to avoid blocking the UI
+        new SendToDataLayerThread("/message_path", message).start();
     }
 
     public void onClick_Track(View v) {
@@ -217,6 +224,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 .icon(BitmapDescriptorFactory
                         .defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
         map.animateCamera(update);
+
+        String message = "Wow";
+        //Requires a new thread to avoid blocking the UI
+        new SendToDataLayerThread("/message_path", message).start();
 
         /*map.setMapType(GoogleMap.MAP_TYPE_NORMAL);
         CameraUpdate update = CameraUpdateFactory.newLatLngZoom(LOCATION_DUBLIN, 16);
