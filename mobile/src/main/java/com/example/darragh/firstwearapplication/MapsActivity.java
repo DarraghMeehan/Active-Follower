@@ -30,7 +30,6 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
-import com.google.android.gms.vision.barcode.Barcode;
 import com.google.android.gms.wearable.MessageApi;
 import com.google.android.gms.wearable.Node;
 import com.google.android.gms.wearable.NodeApi;
@@ -47,15 +46,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private double longitude;
     private double latitude;
 
-    private static LatLng prev;
-    private int flag=0;
-
     //Map & map manipulation
     private GoogleMap map;
     private LocationManager locationManager;
     private LocationListener locationListener;
 
-    List<Barcode.GeoPoint> geoArray = new ArrayList<Barcode.GeoPoint>();
+    //Tracking user location and printing the route
     List<LatLng> routePoints = new ArrayList<>();
     Polyline myRoute;
 
@@ -117,10 +113,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             public void onProviderDisabled(String provider) {
 
                 //Enable Location service via an intent
+                Toast.makeText(getBaseContext(), "Activating Location Services ", Toast.LENGTH_LONG).show();
                 Intent locationIntent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
                 startActivity(locationIntent);
             }
         };
+
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 requestPermissions(new String[]{
@@ -208,7 +206,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         .defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
         map.animateCamera(update);
 
-        String message = "Hit the start button";
+        String message = "Start";
         //Requires a new thread to avoid blocking the UI
         new SendToDataLayerThread("/message_path", message).start();
     }
@@ -227,10 +225,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         String message = "Wow";
         //Requires a new thread to avoid blocking the UI
         new SendToDataLayerThread("/message_path", message).start();
-
-        /*map.setMapType(GoogleMap.MAP_TYPE_NORMAL);
-        CameraUpdate update = CameraUpdateFactory.newLatLngZoom(LOCATION_DUBLIN, 16);
-        map.animateCamera(update);*/
     }
 
     /**

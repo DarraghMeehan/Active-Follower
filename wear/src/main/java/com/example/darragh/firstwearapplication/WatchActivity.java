@@ -12,17 +12,21 @@ import android.support.wearable.view.BoxInsetLayout;
 import android.support.wearable.view.WatchViewStub;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.wearable.Wearable;
 
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
@@ -33,6 +37,14 @@ public class WatchActivity extends WearableActivity implements
 
     private static final SimpleDateFormat AMBIENT_DATE_FORMAT =
             new SimpleDateFormat("HH:mm", Locale.UK);
+
+    //Location Variables
+    private double longitude;
+    private double latitude;
+    LatLng startLocation;
+    //Tracking user location and printing the route
+    List<LatLng> routePoints = new ArrayList<>();
+    private double totalDistance;
 
     private BoxInsetLayout mContainerView;
     private TextView mTextView;
@@ -55,6 +67,7 @@ public class WatchActivity extends WearableActivity implements
                 speed = (TextView) stub.findViewById(R.id.speed);
                 distance = (TextView) stub.findViewById(R.id.distance);
                 runTime = (TextView) stub.findViewById(R.id.runTime);
+                runTime.setText("nil");
             }
         });
         setAmbientEnabled();
@@ -68,8 +81,8 @@ public class WatchActivity extends WearableActivity implements
     public class MessageReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
+
             String message = intent.getStringExtra("message");
-            //Log.v("myTag", "Main activity received message: " + message);
             // Display message in UI
             runTime.setText(message);
         }
@@ -87,21 +100,11 @@ public class WatchActivity extends WearableActivity implements
                     .addOnConnectionFailedListener(this)
                     .build();
         }
-        googleApiClient.connect();
-    }
 
-    // Register as a listener when connected
-    @Override
-    public void onConnected(Bundle connectionHint) {
-
-        runTime.setText("Time 0");
-        LocationRequest locationRequest = LocationRequest.create(); // Create the LocationRequest object
-        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY); // Use high accuracy
-        locationRequest.setInterval(TimeUnit.SECONDS.toMillis(2)); // Set the update interval to 2 seconds
-        locationRequest.setFastestInterval(TimeUnit.SECONDS.toMillis(2)); // Set the fastest update interval to 2 seconds
-        locationRequest.setSmallestDisplacement(2); // Set the minimum displacement
-        // Register listener using the LocationRequest object
-        LocationServices.FusedLocationApi.requestLocationUpdates(googleApiClient, locationRequest, this);
+        // If message received from the phone
+        if(runTime.getText()=="Start")
+            googleApiClient.connect();
+        else;
     }
 
     // Disconnect from Google Play Services when the Activity stops
@@ -112,6 +115,24 @@ public class WatchActivity extends WearableActivity implements
             googleApiClient.disconnect();
         }
         super.onStop();
+    }
+
+    // Register as a listener when connected
+    @Override
+    public void onConnected(Bundle connectionHint) {
+
+        Toast.makeText(getBaseContext(), "Connected to phone ", Toast.LENGTH_LONG).show();
+        //runTime.setText("Time 0");
+        LocationRequest locationRequest = LocationRequest.create(); // Create the LocationRequest object
+        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY); // Use high accuracy
+        locationRequest.setInterval(TimeUnit.SECONDS.toMillis(2)); // Set the update interval to 2 seconds
+        locationRequest.setFastestInterval(TimeUnit.SECONDS.toMillis(2)); // Set the fastest update interval to 2 seconds
+        locationRequest.setSmallestDisplacement(2); // Set the minimum displacement
+        // Register listener using the LocationRequest object
+        LocationServices.FusedLocationApi.requestLocationUpdates(googleApiClient, locationRequest, this);
+
+        startLocation = new LatLng(latitude, longitude);
+        routePoints.add(startLocation);
     }
 
     // Placeholders for required connection callbacks
@@ -128,12 +149,25 @@ public class WatchActivity extends WearableActivity implements
     public void onLocationChanged(Location location){
 
         // Display the latitude and longitude in the UI
-        mySpeed = location.getSpeed();
+        mySpeed = location.getSpeed() * 3.6;
         DecimalFormat formatter = new DecimalFormat("##.##");
         String s = formatter.format(mySpeed);
         //speed.setText("Latitude:  " + String.valueOf(location.getLatitude()) +
            //     "\nLongitude:  " + String.valueOf(location.getLongitude()));
-        speed.setText(s + "m/s");
+        speed.setText(s + "km/h");
+
+        //Get current position
+        LatLng mapPoint = new LatLng(latitude, longitude);
+        //Add current position to ArrayList
+        routePoints.add(mapPoint);
+        //totalDistance = mapPoint.distanceTo(startLocation);
+
+        // Loop for the size of the ArrayList
+        for (int z = 0; z < routePoints.size(); z++) {
+            LatLng point = routePoints.get(z);
+
+           // totalDistance = totalDistance + point;
+        }
     }
 
     @Override
