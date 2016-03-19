@@ -28,6 +28,7 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.vision.barcode.Barcode;
 import com.google.android.gms.wearable.MessageApi;
@@ -55,6 +56,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private LocationListener locationListener;
 
     List<Barcode.GeoPoint> geoArray = new ArrayList<Barcode.GeoPoint>();
+    List<LatLng> routePoints = new ArrayList<>();
+    Polyline myRoute;
 
     GoogleApiClient googleClient;
 
@@ -83,24 +86,21 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 //Update Location variables
                 latitude = location.getLatitude();
                 longitude = location.getLongitude();
-                LatLng current = new LatLng(latitude, longitude);
+                LatLng mapPoint = new LatLng(latitude, longitude);
+                routePoints.add(mapPoint);
 
-                //Barcode.GeoPoint New_geopoint =
-                  //      new Barcode.GeoPoint(latitude * 1e6, longitude * 1e6);
+                PolylineOptions options = new PolylineOptions()
+                        .width(5)
+                        .color(Color.BLUE)
+                        .geodesic(true);
 
-                if(flag == 0)  //when the first update comes, we have no previous points,hence this
-                {
-                    prev = current;
-                    flag = 1;
+                for (int z = 0; z < routePoints.size(); z++) {
+                    LatLng point = routePoints.get(z);
+                    options.add(point);
                 }
-                CameraUpdate update = CameraUpdateFactory.newLatLngZoom(current, 16);
-                map.animateCamera(update);
-                map.addPolyline((new PolylineOptions())
-                        .add(prev, current).width(6).color(Color.BLUE)
-                        .visible(true));
-                prev = current;
-                current = null;
+                myRoute = map.addPolyline(options);
             }
+
 
             @Override
             public void onStatusChanged(String provider, int status, Bundle extras) {
