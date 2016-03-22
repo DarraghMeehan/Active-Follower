@@ -6,11 +6,13 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.location.Location;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.wearable.activity.WearableActivity;
 import android.support.wearable.view.BoxInsetLayout;
 import android.support.wearable.view.WatchViewStub;
 import android.view.View;
+import android.widget.Chronometer;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -55,6 +57,8 @@ public class WatchActivity extends WearableActivity implements
     double mySpeed;
     GoogleApiClient googleApiClient;
 
+    Chronometer myChrono;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -66,8 +70,9 @@ public class WatchActivity extends WearableActivity implements
                 //mTextView = (TextView) stub.findViewById(R.id.text);
                 speed = (TextView) stub.findViewById(R.id.speed);
                 distance = (TextView) stub.findViewById(R.id.distance);
-                runTime = (TextView) stub.findViewById(R.id.runTime);
-                runTime.setText("nil");
+                //runTime = (TextView) stub.findViewById(R.id.runTime);
+                myChrono= (Chronometer) findViewById(R.id.myChrono);
+                //distance.setText("nil");
             }
         });
         setAmbientEnabled();
@@ -84,7 +89,17 @@ public class WatchActivity extends WearableActivity implements
 
             String message = intent.getStringExtra("message");
             // Display message in UI
-            runTime.setText(message);
+            //distance.setText(message);
+            myChrono.setBase(SystemClock.elapsedRealtime());
+
+            if(message.equals("Start")){
+                myChrono.start();
+                distance.setText(message);
+            }
+            else if(message.equals("Wow")) {
+                myChrono.stop();
+                distance.setText(message);
+            }
         }
     }
 
@@ -100,11 +115,6 @@ public class WatchActivity extends WearableActivity implements
                     .addOnConnectionFailedListener(this)
                     .build();
         }
-
-        // If message received from the phone
-        if(runTime.getText()=="Start")
-            googleApiClient.connect();
-        else;
     }
 
     // Disconnect from Google Play Services when the Activity stops
