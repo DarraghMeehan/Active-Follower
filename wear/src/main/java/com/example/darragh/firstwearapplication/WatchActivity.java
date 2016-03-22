@@ -46,17 +46,18 @@ public class WatchActivity extends WearableActivity implements
     LatLng startLocation;
     //Tracking user location and printing the route
     List<LatLng> routePoints = new ArrayList<>();
+    ArrayList<Location> locations = new ArrayList<>();
     private double totalDistance;
 
     private BoxInsetLayout mContainerView;
     private TextView mTextView;
     private TextView speed;
     private TextView distance;
-    private TextView runTime;
     private TextView mClockView;
     double mySpeed;
     GoogleApiClient googleApiClient;
 
+    // Stopwatch features
     Chronometer myChrono;
     long timeWhenPaused = 0;
 
@@ -71,8 +72,7 @@ public class WatchActivity extends WearableActivity implements
                 //mTextView = (TextView) stub.findViewById(R.id.text);
                 speed = (TextView) stub.findViewById(R.id.speed);
                 distance = (TextView) stub.findViewById(R.id.distance);
-                //runTime = (TextView) stub.findViewById(R.id.runTime);
-                myChrono= (Chronometer) findViewById(R.id.myChrono);
+                myChrono = (Chronometer) findViewById(R.id.myChrono);
                 //distance.setText("nil");
             }
         });
@@ -90,8 +90,6 @@ public class WatchActivity extends WearableActivity implements
 
             String message = intent.getStringExtra("message");
             // Display message in UI
-            //distance.setText(message);
-
 
             if(message.equals("Start")){
                 myChrono.setBase(SystemClock.elapsedRealtime() + timeWhenPaused);
@@ -118,6 +116,7 @@ public class WatchActivity extends WearableActivity implements
                     .addOnConnectionFailedListener(this)
                     .build();
         }
+        googleApiClient.connect();
     }
 
     // Disconnect from Google Play Services when the Activity stops
@@ -135,7 +134,7 @@ public class WatchActivity extends WearableActivity implements
     public void onConnected(Bundle connectionHint) {
 
         Toast.makeText(getBaseContext(), "Connected to phone ", Toast.LENGTH_LONG).show();
-        //runTime.setText("Time 0");
+
         LocationRequest locationRequest = LocationRequest.create(); // Create the LocationRequest object
         locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY); // Use high accuracy
         locationRequest.setInterval(TimeUnit.SECONDS.toMillis(2)); // Set the update interval to 2 seconds
@@ -145,7 +144,6 @@ public class WatchActivity extends WearableActivity implements
         LocationServices.FusedLocationApi.requestLocationUpdates(googleApiClient, locationRequest, this);
 
         startLocation = new LatLng(latitude, longitude);
-        routePoints.add(startLocation);
     }
 
     // Placeholders for required connection callbacks
@@ -161,25 +159,25 @@ public class WatchActivity extends WearableActivity implements
     @Override
     public void onLocationChanged(Location location){
 
+        // Speed Information
         // Display the latitude and longitude in the UI
         mySpeed = location.getSpeed() * 3.6;
         DecimalFormat formatter = new DecimalFormat("##.##");
         String s = formatter.format(mySpeed);
-        //speed.setText("Latitude:  " + String.valueOf(location.getLatitude()) +
-           //     "\nLongitude:  " + String.valueOf(location.getLongitude()));
         speed.setText(s + "km/h");
 
-        //Get current position
-        LatLng mapPoint = new LatLng(latitude, longitude);
-        //Add current position to ArrayList
-        routePoints.add(mapPoint);
-        //totalDistance = mapPoint.distanceTo(startLocation);
+        // Distance Information
+        // Store the current location
 
-        // Loop for the size of the ArrayList
-        for (int z = 0; z < routePoints.size(); z++) {
-            LatLng point = routePoints.get(z);
+        Location current = new Location("Current");
+        current.setLatitude(location.getLatitude());
+        current.setLongitude(location.getLongitude());
+        locations.add(current);
 
-           // totalDistance = totalDistance + point;
+        for(int i = 1; i < locations.size(); i++){
+            Location previous = locations.get(i - 1);
+            totalDistance = totalDistance + current.distanceTo(previous);
+            distance.setText(totalDistance + " km");
         }
     }
 
