@@ -58,6 +58,7 @@ public class WatchActivity extends WearableActivity implements
     GoogleApiClient googleApiClient;
 
     Chronometer myChrono;
+    long timeWhenPaused = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -90,13 +91,15 @@ public class WatchActivity extends WearableActivity implements
             String message = intent.getStringExtra("message");
             // Display message in UI
             //distance.setText(message);
-            myChrono.setBase(SystemClock.elapsedRealtime());
+
 
             if(message.equals("Start")){
+                myChrono.setBase(SystemClock.elapsedRealtime() + timeWhenPaused);
                 myChrono.start();
                 distance.setText(message);
             }
             else if(message.equals("Wow")) {
+                timeWhenPaused = myChrono.getBase() - SystemClock.elapsedRealtime();
                 myChrono.stop();
                 distance.setText(message);
             }
