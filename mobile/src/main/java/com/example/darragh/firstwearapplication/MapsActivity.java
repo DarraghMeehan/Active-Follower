@@ -9,12 +9,15 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
+import android.widget.Chronometer;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -35,6 +38,7 @@ import com.google.android.gms.wearable.Node;
 import com.google.android.gms.wearable.NodeApi;
 import com.google.android.gms.wearable.Wearable;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -45,6 +49,16 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     //Location Variables
     private double longitude;
     private double latitude;
+
+    private TextView speed;
+    private TextView distance;
+    double mySpeed;
+    double totalDistance;
+    ArrayList<Location> locations = new ArrayList<>();
+
+    // Stopwatch features
+    Chronometer myChrono;
+    long timeWhenPaused = 0;
 
     //Map & map manipulation
     private GoogleMap map;
@@ -71,6 +85,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 .build();
 
         map = ((MapFragment) getFragmentManager().findFragmentById(R.id.map)).getMap();
+        speed = (TextView) findViewById(R.id.speed);
+        distance = (TextView) findViewById(R.id.distance);
+        myChrono = (Chronometer) findViewById(R.id.chronometer);
 
         //Calling the Location Service
         locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
@@ -95,6 +112,22 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     options.add(point);
                 }
                 myRoute = map.addPolyline(options);
+
+                mySpeed = location.getSpeed() * 3.6;
+                DecimalFormat formatter = new DecimalFormat("##.##");
+                String s = formatter.format(mySpeed);
+                speed.setText(s + "km/h");
+
+                Location current = new Location("Current");
+                current.setLatitude(location.getLatitude());
+                current.setLongitude(location.getLongitude());
+                locations.add(current);
+
+                for(int i = 1; i < locations.size(); i++){
+                    Location previous = locations.get(i - 1);
+                    totalDistance = totalDistance + current.distanceTo(previous);
+                    distance.setText(totalDistance + " km");
+                }
             }
 
 
@@ -209,6 +242,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         String message = "Start";
         //Requires a new thread to avoid blocking the UI
         new SendToDataLayerThread("/message_path", message).start();
+
+        myChrono.setBase(SystemClock.elapsedRealtime() + timeWhenPaused);
+        myChrono.start();
+        //distance.setText(message);
     }
 
     public void onClick_Track(View v) {
@@ -225,6 +262,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         String message = "Wow";
         //Requires a new thread to avoid blocking the UI
         new SendToDataLayerThread("/message_path", message).start();
+
+        timeWhenPaused = myChrono.getBase() - SystemClock.elapsedRealtime();
+        myChrono.stop();
+        //distance.setText(message);
     }
 
     /**

@@ -27,7 +27,8 @@ tools:context=".MapsActivity" >
     android:layout_below="@+id/btnTrack"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    />
+    android:layout_alignWithParentIfMissing="true"
+    android:layout_alignParentBottom="true" />
 
 <Button
     android:id="@+id/btnStart"
@@ -37,5 +38,38 @@ tools:context=".MapsActivity" >
     android:layout_alignParentTop="true"
     android:onClick="onClick_Start"
     android:text="Start" />
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_toStartOf="@+id/btnStart"
+        android:layout_alignParentEnd="true"
+        android:layout_below="@+id/map"
+        android:weightSum="1"
+        android:layout_alignTop="@+id/btnTrack">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@android:color/holo_blue_bright"
+            android:text="Speed"
+            android:id="@+id/speed"
+            android:layout_weight="0.62" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@android:color/holo_green_light"
+            android:text="Distance"
+            android:id="@+id/distance"
+            android:layout_weight="0.46" />
+
+        <Chronometer
+            android:layout_width="132dp"
+            android:layout_height="wrap_content"
+            android:background="@android:color/holo_red_light"
+            android:id="@+id/chronometer" />
+    </LinearLayout>
 
 </RelativeLayout>

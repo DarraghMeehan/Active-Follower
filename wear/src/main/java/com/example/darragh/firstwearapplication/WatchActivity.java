@@ -14,7 +14,6 @@ import android.support.wearable.view.WatchViewStub;
 import android.view.View;
 import android.widget.Chronometer;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -133,7 +132,7 @@ public class WatchActivity extends WearableActivity implements
     @Override
     public void onConnected(Bundle connectionHint) {
 
-        Toast.makeText(getBaseContext(), "Connected to phone ", Toast.LENGTH_LONG).show();
+        //Toast.makeText(getBaseContext(), "Connected to phone ", Toast.LENGTH_LONG).show();
 
         LocationRequest locationRequest = LocationRequest.create(); // Create the LocationRequest object
         locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY); // Use high accuracy
