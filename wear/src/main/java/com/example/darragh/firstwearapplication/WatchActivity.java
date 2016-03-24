@@ -47,7 +47,7 @@ public class WatchActivity extends WearableActivity implements
     //Tracking user location and printing the route
     List<LatLng> routePoints = new ArrayList<>();
     ArrayList<Location> locations = new ArrayList<>();
-    private double totalDistance;
+    private double totalDistance = 0;
 
     private BoxInsetLayout mContainerView;
     private TextView mTextView;
@@ -162,6 +162,8 @@ public class WatchActivity extends WearableActivity implements
         // Speed Information
         // Display the latitude and longitude in the UI
         mySpeed = location.getSpeed() * 3.6;
+
+
         new CountDownTimer(30000, 1000) {
 
             public void onTick(long millisUntilFinished) {
