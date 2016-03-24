@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.location.Location;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.os.SystemClock;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.wearable.activity.WearableActivity;
@@ -161,22 +162,41 @@ public class WatchActivity extends WearableActivity implements
         // Speed Information
         // Display the latitude and longitude in the UI
         mySpeed = location.getSpeed() * 3.6;
-        DecimalFormat formatter = new DecimalFormat("##.##");
-        String s = formatter.format(mySpeed);
-        speed.setText(s + "km/h");
+        new CountDownTimer(30000, 1000) {
+
+            public void onTick(long millisUntilFinished) {
+                DecimalFormat formatter = new DecimalFormat("##.##");
+                String s = formatter.format(mySpeed);
+                speed.setText(s + "km/h");
+            }
+
+            public void onFinish() {
+                speed.setText(0 + "km/h");
+            }
+        }.start();
+        //DecimalFormat formatter = new DecimalFormat("##.##");
+        //String s = formatter.format(mySpeed);
+        //speed.setText(s + "km/h");
 
         // Distance Information
         // Store the current location
-
         Location current = new Location("Current");
         current.setLatitude(location.getLatitude());
         current.setLongitude(location.getLongitude());
         locations.add(current);
 
-        for(int i = 1; i < locations.size(); i++){
-            Location previous = locations.get(i - 1);
-            totalDistance = totalDistance + current.distanceTo(previous);
-            distance.setText(totalDistance + " km");
+        // Loop through list of locations
+        for(int i = 0; i < locations.size(); i++){
+
+            if(i==0); // Do nothing for first point
+            else{
+                Location previous = locations.get(i - 1);
+                Location next = locations.get(i);
+                totalDistance = totalDistance + next.distanceTo(previous) / 1000;
+                DecimalFormat distFormat = new DecimalFormat("##.##");
+                String d = distFormat.format(totalDistance);
+                distance.setText(d + " km");
+            }
         }
     }
 

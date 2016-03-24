@@ -114,8 +114,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 myRoute = map.addPolyline(options);
 
                 mySpeed = location.getSpeed() * 3.6;
-                DecimalFormat formatter = new DecimalFormat("##.##");
-                String s = formatter.format(mySpeed);
+                DecimalFormat speedFormat = new DecimalFormat("##.##");
+                String s = speedFormat.format(mySpeed);
                 speed.setText(s + "km/h");
 
                 Location current = new Location("Current");
@@ -123,10 +123,17 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 current.setLongitude(location.getLongitude());
                 locations.add(current);
 
-                for(int i = 1; i < locations.size(); i++){
-                    Location previous = locations.get(i - 1);
-                    totalDistance = totalDistance + current.distanceTo(previous);
-                    distance.setText(totalDistance + " km");
+                for(int i = 0; i < locations.size(); i++){
+
+                    if(i==0);
+                    else{
+                        Location previous = locations.get(i - 1);
+                        Location next = locations.get(i);
+                        totalDistance = totalDistance + next.distanceTo(previous) / 1000;
+                        DecimalFormat distFormat = new DecimalFormat("##.##");
+                        String d = distFormat.format(totalDistance);
+                        distance.setText(d + " km");
+                    }
                 }
             }
 
