@@ -71,9 +71,11 @@ public class WatchActivity extends WearableActivity implements
             public void onLayoutInflated(WatchViewStub stub) {
                 //mTextView = (TextView) stub.findViewById(R.id.text);
                 speed = (TextView) stub.findViewById(R.id.speed);
+                speed.setText(0 + "\nkm/h");
                 distance = (TextView) stub.findViewById(R.id.distance);
+                distance.setText(0 + "\nkm");
                 myChrono = (Chronometer) findViewById(R.id.myChrono);
-                //distance.setText("nil");
+                myChrono.setText("00:00");
             }
         });
         setAmbientEnabled();
@@ -169,11 +171,11 @@ public class WatchActivity extends WearableActivity implements
             public void onTick(long millisUntilFinished) {
                 DecimalFormat formatter = new DecimalFormat("##.##");
                 String s = formatter.format(mySpeed);
-                speed.setText(s + "km/h");
+                speed.setText(s + "\nkm/h");
             }
 
             public void onFinish() {
-                speed.setText(0 + "km/h");
+                speed.setText(0 + "\nkm/h");
             }
         }.start();
         //DecimalFormat formatter = new DecimalFormat("##.##");
@@ -197,7 +199,7 @@ public class WatchActivity extends WearableActivity implements
                 totalDistance = totalDistance + next.distanceTo(previous) / 1000;
                 DecimalFormat distFormat = new DecimalFormat("##.##");
                 String d = distFormat.format(totalDistance);
-                distance.setText(d + " km");
+                distance.setText(d + "\nkm");
             }
         }
     }
