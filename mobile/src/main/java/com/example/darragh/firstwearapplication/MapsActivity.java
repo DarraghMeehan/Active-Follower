@@ -4,6 +4,7 @@ import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -42,6 +43,8 @@ import com.google.android.gms.wearable.Wearable;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
+
+import static android.graphics.Color.BLUE;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback,
         GoogleApiClient.ConnectionCallbacks,
@@ -111,7 +114,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
                 PolylineOptions options = new PolylineOptions()
                         .width(5)
-                        .color(Color.BLUE)
+                        .color(BLUE)
                         .geodesic(true);
 
                 for (int z = 0; z < routePoints.size(); z++) {
@@ -244,6 +247,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     public void onClick_Start(View v) {
 
+        //Changes the status of the button
         if (status)
             pause();
         else
@@ -263,25 +267,30 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     public void pause(){
 
-        startButton.setText("Play");
-        startButton.setBackgroundColor(Color.GREEN);
+        //Changes the text and the colour of the button
+        startButton.setText("Resume");
+        startButton.getBackground().setColorFilter(Color.GREEN, PorterDuff.Mode.MULTIPLY);
+
+        //Send message to watch
         String message = "Pause";
-        //Requires a new thread to avoid blocking the UI
         new SendToDataLayerThread("/message_path", message).start();
 
-        // Save the current time
+        //Save the current time
         timeWhenPaused = myChrono.getBase() - SystemClock.elapsedRealtime();
         myChrono.stop();
     }
 
     public void play(){
 
+        //Changes the text and the colour of the button
         startButton.setText("Pause");
-        startButton.setBackgroundColor(Color.RED);
+        startButton.getBackground().setColorFilter(Color.RED, PorterDuff.Mode.MULTIPLY);
+
+        //Send message to watch
         String message = "Start";
-        //Requires a new thread to avoid blocking the UI
         new SendToDataLayerThread("/message_path", message).start();
 
+        //Resume time count from previous time.
         myChrono.setBase(SystemClock.elapsedRealtime() + timeWhenPaused);
         myChrono.start();
     }
