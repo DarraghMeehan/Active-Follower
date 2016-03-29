@@ -269,6 +269,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         //Requires a new thread to avoid blocking the UI
         new SendToDataLayerThread("/message_path", message).start();
 
+        // Save the current time
         timeWhenPaused = myChrono.getBase() - SystemClock.elapsedRealtime();
         myChrono.stop();
     }
