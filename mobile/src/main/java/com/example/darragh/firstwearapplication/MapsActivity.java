@@ -16,6 +16,7 @@ import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
+import android.widget.Button;
 import android.widget.Chronometer;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -59,6 +60,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     // Stopwatch features
     Chronometer myChrono;
     long timeWhenPaused = 0;
+    boolean status = false;
+    Button startButton;
 
     //Map & map manipulation
     private GoogleMap map;
@@ -84,10 +87,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 .addOnConnectionFailedListener(this)
                 .build();
 
+        startButton = (Button) findViewById(R.id.btnStart);
         map = ((MapFragment) getFragmentManager().findFragmentById(R.id.map)).getMap();
         speed = (TextView) findViewById(R.id.speed);
+        speed.setText(0 + " km/h");
         distance = (TextView) findViewById(R.id.distance);
+        distance.setText(0 + " km");
         myChrono = (Chronometer) findViewById(R.id.chronometer);
+        myChrono.setText("00:00");
 
         //Calling the Location Service
         locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
@@ -237,6 +244,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     public void onClick_Start(View v) {
 
+        if (status)
+            pause();
+        else
+            play();
+        status = !status;
+
         map.setMapType(GoogleMap.MAP_TYPE_NORMAL);
         LatLng MY_LOCATION = new LatLng(latitude, longitude);
         CameraUpdate update = CameraUpdateFactory.newLatLngZoom(MY_LOCATION, 17);
@@ -246,13 +259,30 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         .defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
         map.animateCamera(update);
 
+    }
+
+    public void pause(){
+
+        startButton.setText("Play");
+        startButton.setBackgroundColor(Color.GREEN);
+        String message = "Pause";
+        //Requires a new thread to avoid blocking the UI
+        new SendToDataLayerThread("/message_path", message).start();
+
+        timeWhenPaused = myChrono.getBase() - SystemClock.elapsedRealtime();
+        myChrono.stop();
+    }
+
+    public void play(){
+
+        startButton.setText("Pause");
+        startButton.setBackgroundColor(Color.RED);
         String message = "Start";
         //Requires a new thread to avoid blocking the UI
         new SendToDataLayerThread("/message_path", message).start();
 
         myChrono.setBase(SystemClock.elapsedRealtime() + timeWhenPaused);
         myChrono.start();
-        //distance.setText(message);
     }
 
     public void onClick_Track(View v) {
@@ -265,14 +295,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 .icon(BitmapDescriptorFactory
                         .defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
         map.animateCamera(update);
-
-        String message = "Wow";
-        //Requires a new thread to avoid blocking the UI
-        new SendToDataLayerThread("/message_path", message).start();
-
-        timeWhenPaused = myChrono.getBase() - SystemClock.elapsedRealtime();
-        myChrono.stop();
-        //distance.setText(message);
     }
 
     /**

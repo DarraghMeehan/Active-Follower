@@ -41,20 +41,19 @@ public class WatchActivity extends WearableActivity implements
             new SimpleDateFormat("HH:mm", Locale.UK);
 
     //Location Variables
-    private double longitude;
-    private double latitude;
-    LatLng startLocation;
     //Tracking user location and printing the route
     List<LatLng> routePoints = new ArrayList<>();
     ArrayList<Location> locations = new ArrayList<>();
-    private double totalDistance = 0;
+
 
     private BoxInsetLayout mContainerView;
     private TextView mTextView;
-    private TextView speed;
-    private TextView distance;
     private TextView mClockView;
+    private TextView speed;
     double mySpeed;
+    private TextView distance;
+    private double totalDistance = 0;
+
     GoogleApiClient googleApiClient;
 
     // Stopwatch features
@@ -63,6 +62,7 @@ public class WatchActivity extends WearableActivity implements
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_watch);
         final WatchViewStub stub = (WatchViewStub) findViewById(R.id.watch_view_stub);
@@ -98,7 +98,7 @@ public class WatchActivity extends WearableActivity implements
                 myChrono.start();
                 distance.setText(message);
             }
-            else if(message.equals("Wow")) {
+            else if(message.equals("Pause")) {
                 timeWhenPaused = myChrono.getBase() - SystemClock.elapsedRealtime();
                 myChrono.stop();
                 distance.setText(message);
@@ -144,8 +144,6 @@ public class WatchActivity extends WearableActivity implements
         locationRequest.setSmallestDisplacement(2); // Set the minimum displacement
         // Register listener using the LocationRequest object
         LocationServices.FusedLocationApi.requestLocationUpdates(googleApiClient, locationRequest, this);
-
-        startLocation = new LatLng(latitude, longitude);
     }
 
     // Placeholders for required connection callbacks
@@ -164,7 +162,6 @@ public class WatchActivity extends WearableActivity implements
         // Speed Information
         // Display the latitude and longitude in the UI
         mySpeed = location.getSpeed() * 3.6;
-
 
         new CountDownTimer(30000, 1000) {
 
