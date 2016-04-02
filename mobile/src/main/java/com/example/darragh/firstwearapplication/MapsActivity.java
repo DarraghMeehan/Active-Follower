@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
-import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -14,6 +13,7 @@ import android.os.Bundle;
 import android.os.SystemClock;
 import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
@@ -46,19 +46,21 @@ import java.util.List;
 
 import static android.graphics.Color.BLUE;
 
-public class MapsActivity extends Home implements OnMapReadyCallback,
+public class MapsActivity extends FragmentActivity implements OnMapReadyCallback,
         GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener{
 
     //Location Variables
     private double longitude;
     private double latitude;
-    final Criteria criteria = new Criteria();
+    double latitude_prev = 0;
+    double longitude_prev = 0;
+    static double totalDist = 0;
+    double totalDistance;
 
     private TextView speed;
     private TextView distance;
     double mySpeed;
-    double totalDistance;
     ArrayList<Location> locations = new ArrayList<>();
 
     // Stopwatch features
@@ -75,11 +77,15 @@ public class MapsActivity extends Home implements OnMapReadyCallback,
     //Tracking user location and printing the route
     List<LatLng> routePoints = new ArrayList<>();
     Polyline myRoute;
+    PolylineOptions options = new PolylineOptions()
+            .width(5)
+            .color(BLUE)
+            .geodesic(true);
 
     GoogleApiClient googleClient;
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_phone);
 
@@ -93,6 +99,7 @@ public class MapsActivity extends Home implements OnMapReadyCallback,
 
         startButton = (Button) findViewById(R.id.btnStart);
         map = ((MapFragment) getFragmentManager().findFragmentById(R.id.map)).getMap();
+
         speed = (TextView) findViewById(R.id.speed);
         speed.setText(0 + " km/h");
         distance = (TextView) findViewById(R.id.distance);
@@ -111,48 +118,55 @@ public class MapsActivity extends Home implements OnMapReadyCallback,
                 latitude = location.getLatitude();
                 longitude = location.getLongitude();
                 LatLng mapPoint = new LatLng(latitude, longitude);
+
                 routePoints.add(mapPoint);
-
-                PolylineOptions options = new PolylineOptions()
-                        .width(5)
-                        .color(BLUE)
-                        .geodesic(true);
-
                 for (int z = 0; z < routePoints.size(); z++) {
                     LatLng point = routePoints.get(z);
                     options.add(point);
                 }
                 myRoute = map.addPolyline(options);
 
-                mySpeed = location.getSpeed() * 3.6;
-                DecimalFormat speedFormat = new DecimalFormat("##.##");
-                String s = speedFormat.format(mySpeed);
-                speed.setText(s + "km/h");
+                //Take location & read speed info
+                getSpeed(location);
 
                 Location current = new Location("Current");
-                current.setLatitude(location.getLatitude());
-                current.setLongitude(location.getLongitude());
+                current.setLatitude(latitude);
+                current.setLongitude(longitude);
                 locations.add(current);
 
-                for(int i = 0; i < locations.size(); i++){
+                //Take locations array & read distance info
+                //getDistance(locations);
+                getLocation(location);
+            }
 
-                    if(i==0);
-                    else{
-                        Location previous = locations.get(i - 1);
-                        Location next = locations.get(i);
-                        totalDistance = totalDistance + next.distanceTo(previous) / 1000;
-                        DecimalFormat distFormat = new DecimalFormat("##.##");
-                        String d = distFormat.format(totalDistance);
-                        distance.setText(d + " km");
-                    }
+            private void getLocation(Location location){
+
+                double lat = location.getLatitude();
+                double lon = location.getLongitude();
+
+                if(latitude_prev==0 && longitude_prev==0){
+                    latitude_prev = lat;
+                    longitude_prev = lon;
+                    totalDistance = 0;
+                }
+                else{
+                    //Get the distance covered from point A to point B
+                    totalDistance = getDistance(latitude_prev, longitude_prev, lat, lon);
+
+                    //Set previous latitude and longitude to the last location
+                    latitude_prev = lat;
+                    longitude_prev = lon;
+
+                    //Print the distance information
+                    DecimalFormat distFormat = new DecimalFormat("##.##");
+                    String d = distFormat.format(totalDistance);
+                    distance.setText(d + " km");
                 }
             }
 
 
             @Override
-            public void onStatusChanged(String provider, int status, Bundle extras) {
-
-            }
+            public void onStatusChanged(String provider, int status, Bundle extras) { }
 
             @Override
             public void onProviderEnabled(String provider) {
@@ -180,14 +194,36 @@ public class MapsActivity extends Home implements OnMapReadyCallback,
             }
             return;
         }
-        locationManager.requestLocationUpdates("gps", 5000, 5, locationListener);
-        String provider = locationManager.getBestProvider(criteria, true);
-        criteria.setAccuracy(Criteria.ACCURACY_FINE);
+        locationManager.requestLocationUpdates("gps", 5000, 0, locationListener);
+    }
+
+    private static Double getDistance(double lat1, double lng1, double lat2, double lng2){
+
+        double earthRadius = 6371;
+        double dLat = Math.toRadians(lat2-lat1);
+        double dLng = Math.toRadians(lng2-lng1);
+        double a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2)) *
+                        Math.sin(dLng/2) * Math.sin(dLng/2);
+        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        double distance =  earthRadius * c;
+
+        totalDist = totalDist + distance;
+        return totalDist;
+    }
+
+    private void getSpeed(Location location) {
+
+        mySpeed = location.getSpeed() * 3.6;
+        DecimalFormat speedFormat = new DecimalFormat("##.##");
+        String s = speedFormat.format(mySpeed);
+        speed.setText(s + "km/h");
     }
 
     // Connect to the data layer when the Activity starts
     @Override
     protected void onStart() {
+
         super.onStart();
         googleClient.connect();
     }
@@ -195,6 +231,7 @@ public class MapsActivity extends Home implements OnMapReadyCallback,
     // Send a message when the data layer connection is successful.
     @Override
     public void onConnected(Bundle connectionHint) {
+
         String message = "Hello wearable\n Via the data layer";
         //Requires a new thread to avoid blocking the UI
         new SendToDataLayerThread("/message_path", message).start();
@@ -203,6 +240,7 @@ public class MapsActivity extends Home implements OnMapReadyCallback,
     // Disconnect from the data layer when the Activity stops
     @Override
     protected void onStop() {
+
         if (null != googleClient && googleClient.isConnected()) {
             googleClient.disconnect();
         }
@@ -219,12 +257,14 @@ public class MapsActivity extends Home implements OnMapReadyCallback,
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
+
         // Inflate the menu; this adds items to the action bar if it is present.
         //getMenuInflater().inflate(R.menu.main, menu);
         return true;
     }
 
     class SendToDataLayerThread extends Thread {
+
         String path;
         String message;
 
@@ -235,6 +275,7 @@ public class MapsActivity extends Home implements OnMapReadyCallback,
         }
 
         public void run() {
+
             NodeApi.GetConnectedNodesResult nodes = Wearable.NodeApi.getConnectedNodes(googleClient).await();
             for (Node node : nodes.getNodes()) {
                 MessageApi.SendMessageResult result = Wearable.MessageApi.sendMessage(googleClient, node.getId(), path, message.getBytes()).await();
@@ -255,6 +296,7 @@ public class MapsActivity extends Home implements OnMapReadyCallback,
             pause();
         else
             play();
+        //Toggle the status of the stopwatch
         status = !status;
 
         map.setMapType(GoogleMap.MAP_TYPE_NORMAL);
@@ -265,7 +307,6 @@ public class MapsActivity extends Home implements OnMapReadyCallback,
                 .icon(BitmapDescriptorFactory
                         .defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
         map.animateCamera(update);
-
     }
 
     public void pause(){

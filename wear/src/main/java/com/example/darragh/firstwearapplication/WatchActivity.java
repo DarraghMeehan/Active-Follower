@@ -96,12 +96,10 @@ public class WatchActivity extends WearableActivity implements
             if(message.equals("Start")){
                 myChrono.setBase(SystemClock.elapsedRealtime() + timeWhenPaused);
                 myChrono.start();
-                distance.setText(message);
             }
             else if(message.equals("Pause")) {
                 timeWhenPaused = myChrono.getBase() - SystemClock.elapsedRealtime();
                 myChrono.stop();
-                distance.setText(message);
             }
         }
     }
@@ -168,7 +166,7 @@ public class WatchActivity extends WearableActivity implements
             public void onTick(long millisUntilFinished) {
                 DecimalFormat formatter = new DecimalFormat("##.##");
                 String s = formatter.format(mySpeed);
-                speed.setText(s + "\nkm/h");
+                //speed.setText(s + "\nkm/h");
             }
 
             public void onFinish() {
