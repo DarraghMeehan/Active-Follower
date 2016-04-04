@@ -43,7 +43,7 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
-import static android.graphics.Color.CYAN;
+import static android.graphics.Color.BLUE;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback,
         GoogleApiClient.ConnectionCallbacks,
@@ -76,7 +76,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     List<LatLng> routePoints = new ArrayList<>();
     PolylineOptions options = new PolylineOptions()
             .width(10)
-            .color(CYAN)
+            .color(BLUE)
             .geodesic(true);
 
     GoogleApiClient googleClient;
@@ -300,7 +300,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         CameraUpdate update = CameraUpdateFactory.newLatLngZoom(pauseLocation, 17);
         map.addMarker(new MarkerOptions().position(pauseLocation)
                 .icon(BitmapDescriptorFactory
-                        .defaultMarker(BitmapDescriptorFactory.HUE_YELLOW)));
+                        .defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
         map.animateCamera(update);
     }
 

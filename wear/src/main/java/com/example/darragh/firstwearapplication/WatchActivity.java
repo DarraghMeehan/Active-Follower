@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.location.Location;
 import android.os.Bundle;
-import android.os.CountDownTimer;
 import android.os.SystemClock;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.wearable.activity.WearableActivity;
@@ -21,14 +20,11 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.wearable.Wearable;
 
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
@@ -42,9 +38,10 @@ public class WatchActivity extends WearableActivity implements
 
     //Location Variables
     //Tracking user location and printing the route
-    List<LatLng> routePoints = new ArrayList<>();
-    ArrayList<Location> locations = new ArrayList<>();
-
+    double latitude_prev = 0;
+    double longitude_prev = 0;
+    static double totalDist = 0;
+    private double totalDistance = 0;
 
     private BoxInsetLayout mContainerView;
     private TextView mTextView;
@@ -52,7 +49,6 @@ public class WatchActivity extends WearableActivity implements
     private TextView speed;
     double mySpeed;
     private TextView distance;
-    private double totalDistance = 0;
 
     GoogleApiClient googleApiClient;
 
@@ -155,48 +151,61 @@ public class WatchActivity extends WearableActivity implements
     }
 
     @Override
-    public void onLocationChanged(Location location){
+    public void onLocationChanged(Location location) {
 
-        // Speed Information
-        // Display the latitude and longitude in the UI
-        mySpeed = location.getSpeed() * 3.6;
+        //Take location & read speed info
+        getSpeed(location);
 
-        new CountDownTimer(30000, 1000) {
+        //Take locations array & read distance info
+        getLocation(location);
+    }
 
-            public void onTick(long millisUntilFinished) {
-                DecimalFormat formatter = new DecimalFormat("##.##");
-                String s = formatter.format(mySpeed);
-                //speed.setText(s + "\nkm/h");
-            }
+    private void getLocation(Location location){
 
-            public void onFinish() {
-                speed.setText(0 + "\nkm/h");
-            }
-        }.start();
-        //DecimalFormat formatter = new DecimalFormat("##.##");
-        //String s = formatter.format(mySpeed);
-        //speed.setText(s + "km/h");
+        double lat = location.getLatitude();
+        double lon = location.getLongitude();
 
-        // Distance Information
-        // Store the current location
-        Location current = new Location("Current");
-        current.setLatitude(location.getLatitude());
-        current.setLongitude(location.getLongitude());
-        locations.add(current);
-
-        // Loop through list of locations
-        for(int i = 0; i < locations.size(); i++){
-
-            if(i==0); // Do nothing for first point
-            else{
-                Location previous = locations.get(i - 1);
-                Location next = locations.get(i);
-                totalDistance = totalDistance + next.distanceTo(previous) / 1000;
-                DecimalFormat distFormat = new DecimalFormat("##.##");
-                String d = distFormat.format(totalDistance);
-                distance.setText(d + "\nkm");
-            }
+        if(latitude_prev==0 && longitude_prev==0){
+            latitude_prev = lat;
+            longitude_prev = lon;
+            totalDistance = 0;
         }
+        else{
+            //Get the distance covered from point A to point B
+            totalDistance = getDistance(latitude_prev, longitude_prev, lat, lon);
+
+            //Set previous latitude and longitude to the last location
+            latitude_prev = lat;
+            longitude_prev = lon;
+
+            //Print the distance information
+            DecimalFormat distFormat = new DecimalFormat("##.##");
+            String d = distFormat.format(totalDistance);
+            distance.setText(d + " km");
+        }
+    }
+
+    private static Double getDistance(double lat1, double lng1, double lat2, double lng2){
+
+        double earthRadius = 6371;
+        double dLat = Math.toRadians(lat2-lat1);
+        double dLng = Math.toRadians(lng2-lng1);
+        double a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2)) *
+                        Math.sin(dLng/2) * Math.sin(dLng/2);
+        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        double distance =  earthRadius * c;
+
+        totalDist = totalDist + distance;
+        return totalDist;
+    }
+
+    private void getSpeed(Location location) {
+
+        mySpeed = location.getSpeed() * 3.6;
+        DecimalFormat speedFormat = new DecimalFormat("##.##");
+        String s = speedFormat.format(mySpeed);
+        speed.setText(s + "km/h");
     }
 
     @Override
