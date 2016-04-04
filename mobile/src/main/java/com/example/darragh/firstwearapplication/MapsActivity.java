@@ -33,7 +33,6 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.wearable.MessageApi;
 import com.google.android.gms.wearable.Node;
@@ -44,7 +43,7 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
-import static android.graphics.Color.BLUE;
+import static android.graphics.Color.CYAN;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback,
         GoogleApiClient.ConnectionCallbacks,
@@ -61,7 +60,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private TextView speed;
     private TextView distance;
     double mySpeed;
-    ArrayList<Location> locations = new ArrayList<>();
 
     // Stopwatch features
     Chronometer myChrono;
@@ -76,10 +74,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     //Tracking user location and printing the route
     List<LatLng> routePoints = new ArrayList<>();
-    Polyline myRoute;
     PolylineOptions options = new PolylineOptions()
-            .width(5)
-            .color(BLUE)
+            .width(10)
+            .color(CYAN)
             .geodesic(true);
 
     GoogleApiClient googleClient;
@@ -107,94 +104,92 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         myChrono = (Chronometer) findViewById(R.id.chronometer);
         myChrono.setText("00:00");
 
-        //Calling the Location Service
-        locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+        //Checks to see if Play/Pause
+        if(status);
+        else
+        {
+            //Calling the Location Service
+            locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
 
-        locationListener = new LocationListener() {
-            @Override
-            public void onLocationChanged(Location location) {
+            locationListener = new LocationListener() {
+                @Override
+                public void onLocationChanged(Location location) {
 
-                //Update Location variables
-                latitude = location.getLatitude();
-                longitude = location.getLongitude();
-                LatLng mapPoint = new LatLng(latitude, longitude);
+                    //Update Location variables
+                    latitude = location.getLatitude();
+                    longitude = location.getLongitude();
+                    LatLng mapPoint = new LatLng(latitude, longitude);
+                    routePoints.add(mapPoint);
 
-                routePoints.add(mapPoint);
-                for (int z = 0; z < routePoints.size(); z++) {
-                    LatLng point = routePoints.get(z);
-                    options.add(point);
+                    //Take location & read speed info
+                    getSpeed(location);
+
+                    //Take locations array & read distance info
+                    getLocation(location);
                 }
-                myRoute = map.addPolyline(options);
 
-                //Take location & read speed info
-                getSpeed(location);
+                private void getLocation(Location location){
 
-                Location current = new Location("Current");
-                current.setLatitude(latitude);
-                current.setLongitude(longitude);
-                locations.add(current);
+                    double lat = location.getLatitude();
+                    double lon = location.getLongitude();
+                    LatLng current = new LatLng(lat, lon);
 
-                //Take locations array & read distance info
-                //getDistance(locations);
-                getLocation(location);
-            }
+                    if(latitude_prev==0 && longitude_prev==0){
+                        latitude_prev = lat;
+                        longitude_prev = lon;
+                        totalDistance = 0;
+                    }
+                    else{
+                        //Get the distance covered from point A to point B
+                        totalDistance = getDistance(latitude_prev, longitude_prev, lat, lon);
 
-            private void getLocation(Location location){
+                        //Set previous latitude and longitude to the last location
+                        latitude_prev = lat;
+                        longitude_prev = lon;
 
-                double lat = location.getLatitude();
-                double lon = location.getLongitude();
+                        //Print the route line on the map
+                        options.add(current);
+                        map.addPolyline(options);
+                        CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(current, 17);
+                        map.moveCamera(cameraUpdate);
 
-                if(latitude_prev==0 && longitude_prev==0){
-                    latitude_prev = lat;
-                    longitude_prev = lon;
-                    totalDistance = 0;
+                        //Print the distance information
+                        DecimalFormat distFormat = new DecimalFormat("##.##");
+                        String d = distFormat.format(totalDistance);
+                        distance.setText(d + " km");
+                    }
                 }
-                else{
-                    //Get the distance covered from point A to point B
-                    totalDistance = getDistance(latitude_prev, longitude_prev, lat, lon);
 
-                    //Set previous latitude and longitude to the last location
-                    latitude_prev = lat;
-                    longitude_prev = lon;
+                @Override
+                public void onStatusChanged(String provider, int status, Bundle extras) { }
 
-                    //Print the distance information
-                    DecimalFormat distFormat = new DecimalFormat("##.##");
-                    String d = distFormat.format(totalDistance);
-                    distance.setText(d + " km");
+                @Override
+                public void onProviderEnabled(String provider) {
+
+                    Toast.makeText(getBaseContext(), "GPS turned on ", Toast.LENGTH_LONG).show();
                 }
+
+                @Override
+                public void onProviderDisabled(String provider) {
+
+                    //Enable Location service via an intent
+                    Toast.makeText(getBaseContext(), "Activating Location Services ", Toast.LENGTH_LONG).show();
+                    Intent locationIntent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                    startActivity(locationIntent);
+                }
+            };
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    requestPermissions(new String[]{
+
+                            Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION,
+                            Manifest.permission.INTERNET
+                    }, 10);
+                }
+                return;
             }
-
-
-            @Override
-            public void onStatusChanged(String provider, int status, Bundle extras) { }
-
-            @Override
-            public void onProviderEnabled(String provider) {
-
-                Toast.makeText(getBaseContext(), "GPS turned on ", Toast.LENGTH_LONG).show();
-            }
-
-            @Override
-            public void onProviderDisabled(String provider) {
-
-                //Enable Location service via an intent
-                Toast.makeText(getBaseContext(), "Activating Location Services ", Toast.LENGTH_LONG).show();
-                Intent locationIntent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-                startActivity(locationIntent);
-            }
-        };
-
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                requestPermissions(new String[]{
-
-                        Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION,
-                        Manifest.permission.INTERNET
-                }, 10);
-            }
-            return;
+            locationManager.requestLocationUpdates("gps", 500, 1, locationListener);
         }
-        locationManager.requestLocationUpdates("gps", 5000, 0, locationListener);
     }
 
     private static Double getDistance(double lat1, double lng1, double lat2, double lng2){
@@ -299,13 +294,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         //Toggle the status of the stopwatch
         status = !status;
 
+        //Drop Yellow marker at paused position
         map.setMapType(GoogleMap.MAP_TYPE_NORMAL);
-        LatLng MY_LOCATION = new LatLng(latitude, longitude);
-        CameraUpdate update = CameraUpdateFactory.newLatLngZoom(MY_LOCATION, 17);
-
-        map.addMarker(new MarkerOptions().position(MY_LOCATION)
+        LatLng pauseLocation = new LatLng(latitude, longitude);
+        CameraUpdate update = CameraUpdateFactory.newLatLngZoom(pauseLocation, 17);
+        map.addMarker(new MarkerOptions().position(pauseLocation)
                 .icon(BitmapDescriptorFactory
-                        .defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
+                        .defaultMarker(BitmapDescriptorFactory.HUE_YELLOW)));
         map.animateCamera(update);
     }
 
