@@ -98,6 +98,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         startButton = (Button) findViewById(R.id.btnStart);
         finishButton = (Button) findViewById(R.id.btnFinish);
+        //Hide the finish button
         finishButton.setVisibility(View.INVISIBLE);
 
         map = ((MapFragment) getFragmentManager().findFragmentById(R.id.map)).getMap();
