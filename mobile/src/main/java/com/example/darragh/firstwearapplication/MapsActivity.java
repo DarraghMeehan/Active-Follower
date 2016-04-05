@@ -104,22 +104,20 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         myChrono = (Chronometer) findViewById(R.id.chronometer);
         myChrono.setText("00:00");
 
-        //Checks to see if Play/Pause
-        if(status);
-        else
-        {
-            //Calling the Location Service
-            locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+        //Calling the Location Service
+        locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
 
-            locationListener = new LocationListener() {
-                @Override
-                public void onLocationChanged(Location location) {
+        locationListener = new LocationListener() {
+            @Override
+            public void onLocationChanged(Location location) {
 
-                    //Update Location variables
-                    latitude = location.getLatitude();
-                    longitude = location.getLongitude();
-                    LatLng mapPoint = new LatLng(latitude, longitude);
-                    routePoints.add(mapPoint);
+                //Update Location variables
+                latitude = location.getLatitude();
+                longitude = location.getLongitude();
+                LatLng mapPoint = new LatLng(latitude, longitude);
+                routePoints.add(mapPoint);
+
+                if(status) {
 
                     //Take location & read speed info
                     getSpeed(location);
@@ -127,69 +125,70 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     //Take locations array & read distance info
                     getLocation(location);
                 }
-
-                private void getLocation(Location location){
-
-                    double lat = location.getLatitude();
-                    double lon = location.getLongitude();
-                    LatLng current = new LatLng(lat, lon);
-
-                    if(latitude_prev==0 && longitude_prev==0){
-                        latitude_prev = lat;
-                        longitude_prev = lon;
-                        totalDistance = 0;
-                    }
-                    else{
-                        //Get the distance covered from point A to point B
-                        totalDistance = getDistance(latitude_prev, longitude_prev, lat, lon);
-
-                        //Set previous latitude and longitude to the last location
-                        latitude_prev = lat;
-                        longitude_prev = lon;
-
-                        //Print the route line on the map
-                        options.add(current);
-                        map.addPolyline(options);
-                        CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(current, 17);
-                        map.moveCamera(cameraUpdate);
-
-                        //Print the distance information
-                        DecimalFormat distFormat = new DecimalFormat("##.##");
-                        String d = distFormat.format(totalDistance);
-                        distance.setText(d + " km");
-                    }
-                }
-
-                @Override
-                public void onStatusChanged(String provider, int status, Bundle extras) { }
-
-                @Override
-                public void onProviderEnabled(String provider) {
-
-                    Toast.makeText(getBaseContext(), "GPS turned on ", Toast.LENGTH_LONG).show();
-                }
-
-                @Override
-                public void onProviderDisabled(String provider) {
-
-                    //Enable Location service via an intent
-                    Toast.makeText(getBaseContext(), "Activating Location Services ", Toast.LENGTH_LONG).show();
-                    Intent locationIntent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-                    startActivity(locationIntent);
-                }
-            };
-            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    requestPermissions(new String[]{
-
-                            Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION,
-                            Manifest.permission.INTERNET
-                    }, 10);
-                }
-                return;
+                else;
             }
-            locationManager.requestLocationUpdates("gps", 500, 1, locationListener);
+
+            private void getLocation(Location location){
+
+                double lat = location.getLatitude();
+                double lon = location.getLongitude();
+                LatLng current = new LatLng(lat, lon);
+
+                if(latitude_prev==0 && longitude_prev==0){
+                    latitude_prev = lat;
+                    longitude_prev = lon;
+                    totalDistance = 0;
+                }
+                else{
+                    //Get the distance covered from point A to point B
+                    totalDistance = getDistance(latitude_prev, longitude_prev, lat, lon);
+
+                    //Set previous latitude and longitude to the last location
+                    latitude_prev = lat;
+                    longitude_prev = lon;
+
+                    //Print the route line on the map
+                    options.add(current);
+                    map.addPolyline(options);
+                    CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(current, 17);
+                    map.moveCamera(cameraUpdate);
+
+                    //Print the distance information
+                    DecimalFormat distFormat = new DecimalFormat("##.##");
+                    String d = distFormat.format(totalDistance);
+                    distance.setText(d + " km");
+                }
+            }
+
+            @Override
+            public void onStatusChanged(String provider, int status, Bundle extras) { }
+
+            @Override
+            public void onProviderEnabled(String provider) {
+
+                Toast.makeText(getBaseContext(), "GPS turned on ", Toast.LENGTH_LONG).show();
+            }
+
+            @Override
+            public void onProviderDisabled(String provider) {
+
+                //Enable Location service via an intent
+                Toast.makeText(getBaseContext(), "Activating Location Services ", Toast.LENGTH_LONG).show();
+                Intent locationIntent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                startActivity(locationIntent);
+            }
+        };
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                requestPermissions(new String[]{
+
+                        Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION,
+                        Manifest.permission.INTERNET
+                }, 10);
+            }
+            return;
         }
+        locationManager.requestLocationUpdates("gps", 500, 1, locationListener);
     }
 
     private static Double getDistance(double lat1, double lng1, double lat2, double lng2){
@@ -323,7 +322,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         //Changes the text and the colour of the button
         startButton.setText("Pause");
-        startButton.getBackground().setColorFilter(Color.RED, PorterDuff.Mode.MULTIPLY);
+        startButton.getBackground().setColorFilter(Color.YELLOW, PorterDuff.Mode.MULTIPLY);
 
         //Send message to watch
         String message = "Start";
@@ -336,14 +335,16 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     public void onClick_Track(View v) {
 
-        map.setMapType(GoogleMap.MAP_TYPE_NORMAL);
-        LatLng MY_LOCATION = new LatLng(latitude, longitude);
-        CameraUpdate update = CameraUpdateFactory.newLatLngZoom(MY_LOCATION, 17);
+        //Stop the watch
+        myChrono.stop();
+        String finalText = myChrono.getText().toString();
+        final double finalDist = totalDist;
 
-        map.addMarker(new MarkerOptions().position(MY_LOCATION)
-                .icon(BitmapDescriptorFactory
-                        .defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
-        map.animateCamera(update);
+        //Start the final Activity
+        Intent intentFinished = new Intent(MapsActivity.this, FinishedActivity.class);
+        intentFinished.putExtra("time", finalText);
+        intentFinished.putExtra("distance", finalDist);
+        startActivity(intentFinished);
     }
 
     /**
