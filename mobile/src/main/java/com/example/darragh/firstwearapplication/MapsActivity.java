@@ -65,7 +65,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     Chronometer myChrono;
     long timeWhenPaused = 0;
     boolean status = false;
+
     Button startButton;
+    Button finishButton;
 
     //Map & map manipulation
     private GoogleMap map;
@@ -95,6 +97,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 .build();
 
         startButton = (Button) findViewById(R.id.btnStart);
+        finishButton = (Button) findViewById(R.id.btnFinish);
+        finishButton.setVisibility(View.INVISIBLE);
+
         map = ((MapFragment) getFragmentManager().findFragmentById(R.id.map)).getMap();
 
         speed = (TextView) findViewById(R.id.speed);
@@ -305,6 +310,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     public void pause(){
 
+        //Show the finish button
+        finishButton.setVisibility(View.VISIBLE);
+
         //Changes the text and the colour of the button
         startButton.setText("Resume");
         startButton.getBackground().setColorFilter(Color.GREEN, PorterDuff.Mode.MULTIPLY);
@@ -320,6 +328,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     public void play(){
 
+        //Hide the finish button
+        finishButton.setVisibility(View.INVISIBLE);
+
         //Changes the text and the colour of the button
         startButton.setText("Pause");
         startButton.getBackground().setColorFilter(Color.YELLOW, PorterDuff.Mode.MULTIPLY);
@@ -333,7 +344,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         myChrono.start();
     }
 
-    public void onClick_Track(View v) {
+    public void onClick_Finish(View v) {
 
         //Stop the watch
         myChrono.stop();
