@@ -1,19 +1,24 @@
 package com.example.darragh.firstwearapplication;
 
 import android.Manifest;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
@@ -22,6 +27,8 @@ import android.widget.Chronometer;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.appindexing.Action;
+import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
@@ -54,33 +61,37 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private double latitude;
     double latitude_prev = 0;
     double longitude_prev = 0;
+
+    //Distance Variables
     static double totalDist = 0;
     double totalDistance;
 
+    //Speed Variables
     private TextView speed;
     private TextView distance;
     double mySpeed;
+    ArrayList<Double> speedList = new ArrayList<Double>();
 
-    // Stopwatch features
+    //Time Features
     Chronometer myChrono;
     long timeWhenPaused = 0;
     boolean status = false;
 
+    //Buttons
     Button startButton;
     Button finishButton;
 
-    //Map & map manipulation
+    //Map & Map Manipulation
     private GoogleMap map;
     private LocationManager locationManager;
     private LocationListener locationListener;
 
-    //Tracking user location and printing the route
+    //Tracking user location
     List<LatLng> routePoints = new ArrayList<>();
     PolylineOptions options = new PolylineOptions()
             .width(10)
             .color(BLUE)
             .geodesic(true);
-
     GoogleApiClient googleClient;
 
     @Override
@@ -89,12 +100,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         setContentView(R.layout.activity_phone);
 
         // Build a new GoogleApiClient that includes the Wearable API
+        // ATTENTION: This "addApi(AppIndex.API)"was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
         googleClient = new GoogleApiClient.Builder(this)
                 .addApi(Wearable.API)
                 .addApi(LocationServices.API)
                 .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this)
-                .build();
+                .addApi(AppIndex.API).build();
 
         startButton = (Button) findViewById(R.id.btnStart);
         finishButton = (Button) findViewById(R.id.btnFinish);
@@ -123,29 +136,28 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 LatLng mapPoint = new LatLng(latitude, longitude);
                 routePoints.add(mapPoint);
 
-                if(status) {
+                if (status) {
 
                     //Take location & read speed info
                     getSpeed(location);
 
                     //Take locations array & read distance info
                     getLocation(location);
-                }
-                else;
+                } else ;
             }
 
-            private void getLocation(Location location){
+            private void getLocation(Location location) {
 
                 double lat = location.getLatitude();
                 double lon = location.getLongitude();
                 LatLng current = new LatLng(lat, lon);
 
-                if(latitude_prev==0 && longitude_prev==0){
+                if (latitude_prev == 0 && longitude_prev == 0) {
                     latitude_prev = lat;
                     longitude_prev = lon;
                     totalDistance = 0;
                 }
-                else{
+                else {
                     //Get the distance covered from point A to point B
                     totalDistance = getDistance(latitude_prev, longitude_prev, lat, lon);
 
@@ -167,7 +179,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
 
             @Override
-            public void onStatusChanged(String provider, int status, Bundle extras) { }
+            public void onStatusChanged(String provider, int status, Bundle extras) {
+            }
 
             @Override
             public void onProviderEnabled(String provider) {
@@ -195,8 +208,31 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             return;
         }
         locationManager.requestLocationUpdates("gps", 500, 1, locationListener);
+        // Register the local broadcast receiver
+        IntentFilter messageFilter = new IntentFilter(Intent.ACTION_SEND);
+        MessageReceiver messageReceiver = new MessageReceiver();
+        LocalBroadcastManager.getInstance(this).registerReceiver(messageReceiver, messageFilter);
     }
 
+    public class MessageReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+
+            String message = intent.getStringExtra("message");
+            // Display message in UI
+
+            if(message.equals("Start")){
+                play();
+                status = !status;
+            }
+            else if(message.equals("Pause")) {
+                pause();
+                status = !status;
+            }
+        }
+    }
+
+    //Returns the distance of the activity
     private static Double getDistance(double lat1, double lng1, double lat2, double lng2){
 
         double earthRadius = 6371;
@@ -212,9 +248,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         return totalDist;
     }
 
+    //Returns the speed of the user
     private void getSpeed(Location location) {
 
         mySpeed = location.getSpeed() * 3.6;
+        speedList.add(mySpeed); //Add current speed to the arraylist
         DecimalFormat speedFormat = new DecimalFormat("##.##");
         String s = speedFormat.format(mySpeed);
         speed.setText(s + "km/h");
@@ -226,6 +264,19 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         super.onStart();
         googleClient.connect();
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        Action viewAction = Action.newAction(
+                Action.TYPE_VIEW, // TODO: choose an action type.
+                "Maps Page", // TODO: Define a title for the content shown.
+                // TODO: If you have web page content that matches this app activity's content,
+                // make sure this auto-generated web page URL is correct.
+                // Otherwise, set the URL to null.
+                Uri.parse("http://host/path"),
+                // TODO: Make sure this auto-generated app deep link URI is correct.
+                Uri.parse("android-app://com.example.darragh.firstwearapplication/http/host/path")
+        );
+        AppIndex.AppIndexApi.start(googleClient, viewAction);
     }
 
     // Send a message when the data layer connection is successful.
@@ -245,6 +296,19 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             googleClient.disconnect();
         }
         super.onStop();
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        Action viewAction = Action.newAction(
+                Action.TYPE_VIEW, // TODO: choose an action type.
+                "Maps Page", // TODO: Define a title for the content shown.
+                // TODO: If you have web page content that matches this app activity's content,
+                // make sure this auto-generated web page URL is correct.
+                // Otherwise, set the URL to null.
+                Uri.parse("http://host/path"),
+                // TODO: Make sure this auto-generated app deep link URI is correct.
+                Uri.parse("android-app://com.example.darragh.firstwearapplication/http/host/path")
+        );
+        AppIndex.AppIndexApi.end(googleClient, viewAction);
     }
 
     // Placeholders for required connection callbacks
@@ -292,10 +356,18 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void onClick_Start(View v) {
 
         //Changes the status of the button
-        if (status)
+        if (status) {
             pause();
-        else
+            //Send message to watch
+            String message = "Pause";
+            new SendToDataLayerThread("/message_path", message).start();
+        }
+        else {
             play();
+            //Send message to watch
+            String message = "Start";
+            new SendToDataLayerThread("/message_path", message).start();
+        }
         //Toggle the status of the stopwatch
         status = !status;
 
@@ -318,10 +390,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         startButton.setText("Resume");
         startButton.getBackground().setColorFilter(Color.GREEN, PorterDuff.Mode.MULTIPLY);
 
-        //Send message to watch
-        String message = "Pause";
-        new SendToDataLayerThread("/message_path", message).start();
-
         //Save the current time
         timeWhenPaused = myChrono.getBase() - SystemClock.elapsedRealtime();
         myChrono.stop();
@@ -336,10 +404,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         startButton.setText("Pause");
         startButton.getBackground().setColorFilter(Color.YELLOW, PorterDuff.Mode.MULTIPLY);
 
-        //Send message to watch
-        String message = "Start";
-        new SendToDataLayerThread("/message_path", message).start();
-
         //Resume time count from previous time.
         myChrono.setBase(SystemClock.elapsedRealtime() + timeWhenPaused);
         myChrono.start();
@@ -347,16 +411,34 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     public void onClick_Finish(View v) {
 
-        //Stop the watch
+        //Send message to Watch
+        String message = "Finish";
+        new SendToDataLayerThread("/message_path", message).start();
+
+        //Stop the Stopwatch
         myChrono.stop();
         String finalText = myChrono.getText().toString();
         final double finalDist = totalDist;
 
+        double avgSpeed = calculateAverageSpeed();
+
         //Start the final Activity
         Intent intentFinished = new Intent(MapsActivity.this, FinishedActivity.class);
+        intentFinished.putExtra("speed", avgSpeed);
         intentFinished.putExtra("time", finalText);
         intentFinished.putExtra("distance", finalDist);
         startActivity(intentFinished);
+    }
+
+    private double calculateAverageSpeed() {
+
+        double total = 0;
+        for(int i = 0; i<speedList.size(); i++){
+
+            total += speedList.get(i);
+        }
+        double average = total/speedList.size();
+        return(average);
     }
 
     /**

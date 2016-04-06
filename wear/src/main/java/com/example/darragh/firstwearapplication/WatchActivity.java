@@ -4,6 +4,8 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.SystemClock;
@@ -11,7 +13,9 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.support.wearable.activity.WearableActivity;
 import android.support.wearable.view.BoxInsetLayout;
 import android.support.wearable.view.WatchViewStub;
+import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.Chronometer;
 import android.widget.TextView;
 
@@ -20,6 +24,9 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.wearable.MessageApi;
+import com.google.android.gms.wearable.Node;
+import com.google.android.gms.wearable.NodeApi;
 import com.google.android.gms.wearable.Wearable;
 
 import java.text.DecimalFormat;
@@ -55,6 +62,9 @@ public class WatchActivity extends WearableActivity implements
     // Stopwatch features
     Chronometer myChrono;
     long timeWhenPaused = 0;
+    boolean status = false;
+
+    Button activityButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,6 +82,9 @@ public class WatchActivity extends WearableActivity implements
                 distance.setText(0 + "\nkm");
                 myChrono = (Chronometer) findViewById(R.id.myChrono);
                 myChrono.setText("00:00");
+
+                activityButton = (Button) findViewById(R.id.btnWatch);
+
             }
         });
         setAmbientEnabled();
@@ -90,12 +103,15 @@ public class WatchActivity extends WearableActivity implements
             // Display message in UI
 
             if(message.equals("Start")){
-                myChrono.setBase(SystemClock.elapsedRealtime() + timeWhenPaused);
-                myChrono.start();
+                play();
+                status = !status;
             }
             else if(message.equals("Pause")) {
-                timeWhenPaused = myChrono.getBase() - SystemClock.elapsedRealtime();
-                myChrono.stop();
+                pause();
+                status = !status;
+            }
+            else if(message.equals("Finish")) {
+                end();
             }
         }
     }
@@ -129,7 +145,9 @@ public class WatchActivity extends WearableActivity implements
     @Override
     public void onConnected(Bundle connectionHint) {
 
-        //Toast.makeText(getBaseContext(), "Connected to phone ", Toast.LENGTH_LONG).show();
+        String message = "Hello wearable\n Via the data layer";
+        //Requires a new thread to avoid blocking the UI
+        new SendToDataLayerThread("/message_path", message).start();
 
         LocationRequest locationRequest = LocationRequest.create(); // Create the LocationRequest object
         locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY); // Use high accuracy
@@ -188,7 +206,7 @@ public class WatchActivity extends WearableActivity implements
     private static Double getDistance(double lat1, double lng1, double lat2, double lng2){
 
         double earthRadius = 6371;
-        double dLat = Math.toRadians(lat2-lat1);
+        double dLat = Math.toRadians(lat2 - lat1);
         double dLng = Math.toRadians(lng2-lng1);
         double a = Math.sin(dLat/2) * Math.sin(dLat/2) +
                 Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2)) *
@@ -240,5 +258,77 @@ public class WatchActivity extends WearableActivity implements
             speed.setTextColor(getResources().getColor(android.R.color.black));
             mClockView.setVisibility(View.GONE);
         }
+    }
+
+    class SendToDataLayerThread extends Thread {
+
+        String path;
+        String message;
+
+        // Constructor to send a message to the data layer
+        SendToDataLayerThread(String p, String msg) {
+            path = p;
+            message = msg;
+        }
+
+        public void run() {
+
+            NodeApi.GetConnectedNodesResult nodes = Wearable.NodeApi.getConnectedNodes(googleApiClient).await();
+            for (Node node : nodes.getNodes()) {
+                MessageApi.SendMessageResult result = Wearable.MessageApi.sendMessage(googleApiClient, node.getId(), path, message.getBytes()).await();
+                if (result.getStatus().isSuccess()) {
+                    Log.v("Watch", "Message: {" + message + "} sent to: " + node.getDisplayName());
+                } else {
+                    // Log an error
+                    Log.v("Watch", "ERROR: failed to send Message");
+                }
+            }
+        }
+    }
+
+    public void onClick_Watch(View v) {
+
+        //Changes the status of the button
+        if (status) {
+            pause();
+            //Send message to watch
+            String message = "Pause";
+            new SendToDataLayerThread("/message_path", message).start();
+        }
+        else {
+            play();
+            //Send message to watch
+            String message = "Start";
+            new SendToDataLayerThread("/message_path", message).start();
+        }
+        //Toggle the status of the stopwatch
+        status = !status;
+    }
+
+    public void pause(){
+
+        //Changes the text and the colour of the button
+        activityButton.setText("Resume");
+        activityButton.getBackground().setColorFilter(Color.GREEN, PorterDuff.Mode.MULTIPLY);
+
+        //Save the current time
+        timeWhenPaused = myChrono.getBase() - SystemClock.elapsedRealtime();
+        myChrono.stop();
+    }
+
+    public void play(){
+
+        //Changes the text and the colour of the button
+        activityButton.setText("Pause");
+        activityButton.getBackground().setColorFilter(Color.YELLOW, PorterDuff.Mode.MULTIPLY);
+
+        //Resume time count from previous time.
+        myChrono.setBase(SystemClock.elapsedRealtime() + timeWhenPaused);
+        myChrono.start();
+    }
+
+    public void end(){
+
+        setContentView(R.layout.finished_watch);
     }
 }
