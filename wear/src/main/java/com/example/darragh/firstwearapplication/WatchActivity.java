@@ -47,8 +47,10 @@ public class WatchActivity extends WearableActivity implements
     //Tracking user location and printing the route
     double latitude_prev = 0;
     double longitude_prev = 0;
+
+    //Distance Variables
     static double totalDist = 0;
-    private double totalDistance = 0;
+    double totalDistance = 0;
 
     private BoxInsetLayout mContainerView;
     private TextView mTextView;
@@ -84,6 +86,7 @@ public class WatchActivity extends WearableActivity implements
                 myChrono.setText("00:00");
 
                 activityButton = (Button) findViewById(R.id.btnWatch);
+                activityButton.setVisibility(View.INVISIBLE);
 
             }
         });
@@ -100,9 +103,10 @@ public class WatchActivity extends WearableActivity implements
         public void onReceive(Context context, Intent intent) {
 
             String message = intent.getStringExtra("message");
-            // Display message in UI
 
             if(message.equals("Start")){
+                //Show the button
+                activityButton.setVisibility(View.VISIBLE);
                 play();
                 status = !status;
             }
@@ -171,11 +175,14 @@ public class WatchActivity extends WearableActivity implements
     @Override
     public void onLocationChanged(Location location) {
 
-        //Take location & read speed info
-        getSpeed(location);
+        if (status) {
 
-        //Take locations array & read distance info
-        getLocation(location);
+            //Take location & read speed info
+            getSpeed(location);
+
+            //Take locations array & read distance info
+            getLocation(location);
+        } else ;
     }
 
     private void getLocation(Location location){

@@ -65,10 +65,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     //Distance Variables
     static double totalDist = 0;
     double totalDistance;
+    private TextView distance;
 
     //Speed Variables
     private TextView speed;
-    private TextView distance;
     double mySpeed;
     ArrayList<Double> speedList = new ArrayList<Double>();
 
@@ -122,6 +122,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         distance.setText(0 + " km");
         myChrono = (Chronometer) findViewById(R.id.chronometer);
         myChrono.setText("00:00");
+
+        //Send message to Watch
+        String message = "Create";
+        new SendToDataLayerThread("/message_path", message).start();
 
         //Calling the Location Service
         locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
