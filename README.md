@@ -27,7 +27,7 @@ TODO: Write credits
 
 [Google Maps API](https://developers.google.com/maps/documentation/android-api/ "Google Maps")
 
-[Icons8.com - App Icon/Logo](https://icons8.com/ "Android Icon")
+[Icons8 - App Icon/Logo](https://icons8.com/ "Android Icon")
 
 ## License
 TODO: Write license
