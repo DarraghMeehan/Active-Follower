@@ -26,6 +26,7 @@ TODO: Write history
 TODO: Write credits
 
 https://developers.google.com/maps/documentation/android-api/
+
 https://icons8.com/
 
 ## License
