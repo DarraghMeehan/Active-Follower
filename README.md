@@ -1,4 +1,4 @@
-# MyWearApplication ![alt text](https://github.com/DarraghMeehan/MyWearApplication/blob/master/mobile/src/main/res/mipmap-hdpi/ic_launcher.png "Logo Title Text 1")
+# Android wear application ![alt text](https://github.com/DarraghMeehan/MyWearApplication/blob/master/mobile/src/main/res/mipmap-hdpi/ic_launcher.png "Logo Title Text 1")
 
 MyMapsApplication integrated into a wearable application
 
