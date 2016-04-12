@@ -1,7 +1,9 @@
 # MyWearApplication ![alt text][logo]
 
 Android wear application using an Android Smartphone alongside an Android Wearable to track a user activity during a run, walk, cycle etc.
+
 Google maps provides tracking with user movement mapped over the on phone map.
+
 An android watch gives up to date information on speed, distance and time to the user.
 
 ## Installation
