@@ -23,7 +23,6 @@ TODO: Write usage instructions
 TODO: Write history
 
 ## Credits
-TODO: Write credits
 
 [Google Maps API](https://developers.google.com/maps/documentation/android-api/ "Google Maps")
 
