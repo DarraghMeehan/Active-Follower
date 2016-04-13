@@ -6,6 +6,8 @@ Google maps provides tracking with user movement mapped over the on phone map.
 
 An android watch gives up to date information on speed, distance and time to the user.
 
+Run history is stored within an SQLite database.
+
 ## Installation
 TODO: Describe the installation process
 
