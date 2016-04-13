@@ -19,7 +19,7 @@ public class ViewDB extends FragmentActivity{
     SQLiteDatabase db;
     ArrayList<String> results = new ArrayList<>();
 
-    private ListView activityList;
+    ListView activityList;
     TextView text;
     String[] items = { "ID", "SPEED", "DIST", "TIME"};
 
@@ -29,21 +29,20 @@ public class ViewDB extends FragmentActivity{
         setContentView(R.layout.viewdb_phone);
 
         activityList = (ListView) findViewById(R.id.activityListView);
-        ArrayAdapter<String> aa = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, items);
+        ArrayAdapter<String> aa = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, items);
 
         activityList.setAdapter(aa);
         text = (TextView) findViewById(R.id.txtMsg);
 
-
-        String SDcardPath = "data/data/cis470.matos.databases";
+        String SDcardPath = "data/data/com.example.darragh.firstwearapplication";
         String myDbPath = SDcardPath + "/" + "myActivity.db";
 
-        //db = SQLiteDatabase.openDatabase(myDbPath, null,
-                //SQLiteDatabase.OPEN_READONLY);
+        db = SQLiteDatabase.openDatabase(myDbPath, null,
+                SQLiteDatabase.OPEN_READONLY);
 
         try {
             Log.d("viewDB", "Pre SHOW Table");
-            //showTable("tblActivity"); //retrieve all rows from a table
+            showTable("tblActivity"); //retrieve all rows from a table
             //displayResultList();
             db.close(); // make sure to release the DB
         } catch (Exception e) {
@@ -55,8 +54,8 @@ public class ViewDB extends FragmentActivity{
 
         try {
             Log.d("viewDB", "Try to show Table");
-            String sel = "select * from " + tableName ;
-            Cursor cursor = db.rawQuery(sel, null);
+            String select = "select * from " + tableName ;
+            Cursor cursor = db.rawQuery(select, null);
 
             if(cursor.moveToFirst()){
                 Log.d("viewDB", "First");
@@ -65,7 +64,7 @@ public class ViewDB extends FragmentActivity{
                     String speed = cursor.getString(cursor.getColumnIndex("speed"));
                     String distance = cursor.getString(cursor.getColumnIndex("distance"));
                     String time = cursor.getString(cursor.getColumnIndex("time"));
-                    results.add("Speed: " + speed + "\nDistance: " + distance + "Time: " + time);
+                    //items.add("Speed: " + speed + "\nDistance: " + distance + "Time: " + time);
                 }
                 while(cursor.moveToNext());
             }
