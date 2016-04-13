@@ -5,7 +5,9 @@ import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
+import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import java.util.ArrayList;
 
@@ -15,8 +17,11 @@ import java.util.ArrayList;
 public class ViewDB extends FragmentActivity{
 
     SQLiteDatabase db;
-    private ListView activityList;
     ArrayList<String> results = new ArrayList<>();
+
+    private ListView activityList;
+    TextView text;
+    String[] items = { "ID", "SPEED", "DIST", "TIME"};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -24,17 +29,22 @@ public class ViewDB extends FragmentActivity{
         setContentView(R.layout.viewdb_phone);
 
         activityList = (ListView) findViewById(R.id.activityListView);
+        ArrayAdapter<String> aa = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, items);
+
+        activityList.setAdapter(aa);
+        text = (TextView) findViewById(R.id.txtMsg);
+
 
         String SDcardPath = "data/data/cis470.matos.databases";
         String myDbPath = SDcardPath + "/" + "myActivity.db";
 
-        db = SQLiteDatabase.openDatabase(myDbPath, null,
-                SQLiteDatabase.OPEN_READONLY);
+        //db = SQLiteDatabase.openDatabase(myDbPath, null,
+                //SQLiteDatabase.OPEN_READONLY);
 
         try {
-            Log.v("viewDB", "Pre SHOW Table");
-            showTable("tblActivity"); //retrieve all rows from a table
-            displayResultList();
+            Log.d("viewDB", "Pre SHOW Table");
+            //showTable("tblActivity"); //retrieve all rows from a table
+            //displayResultList();
             db.close(); // make sure to release the DB
         } catch (Exception e) {
             finish();
@@ -44,12 +54,12 @@ public class ViewDB extends FragmentActivity{
     private void showTable(String tableName) {
 
         try {
-            Log.v("viewDB", "Try to show Table");
+            Log.d("viewDB", "Try to show Table");
             String sel = "select * from " + tableName ;
             Cursor cursor = db.rawQuery(sel, null);
 
             if(cursor.moveToFirst()){
-                Log.v("viewDB", "First");
+                Log.d("viewDB", "First");
                 do {
                     //int index = cursor.getInt(cursor.getColumnIndex("recID"));
                     String speed = cursor.getString(cursor.getColumnIndex("speed"));
@@ -67,6 +77,9 @@ public class ViewDB extends FragmentActivity{
 
     private void displayResultList(){
 
-        //activityList.setTe
+        for(int i=0; i<results.size(); i++){
+
+            Log.d("viewDB", results.get(i));
+        }
     }
 }

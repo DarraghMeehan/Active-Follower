@@ -1,5 +1,6 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    xmlns:ap="http://schemas.android.com/apk/res-auto"
 
     android:name="com.google.android.gms.maps.SupportMapFragment"
     android:layout_width="match_parent"
@@ -8,7 +9,47 @@
     android:paddingLeft="10dp"
     android:paddingRight="10dp"
     android:paddingTop="16dp"
-    tools:context=".MapsActivity" >
+    tools:context=".MapsActivity">
+
+    <com.androidplot.xy.XYPlot
+        android:id="@+id/plot"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        ap:label="Your speed during activity"
+        ap:rangeLabel="Speed"
+        ap:domainLabel="Time"
+        ap:borderColor="#000000"
+        ap:backgroundColor="#000000"
+        ap:graphBackgroundColor="#000000"
+        ap:gridBackgroundColor="#111111"
+        ap:gridPaddingLeft="20dp"
+        ap:gridPaddingRight="20dp"
+        ap:gridPaddingTop="20dp"
+        ap:gridPaddingBottom="20dp"
+        ap:labelTextSize="20sp"
+        ap:rangeLabelTextSize="13sp"
+        ap:domainLabelTextSize="13sp"
+        ap:graphMarginTop="20dp"
+        ap:graphMarginBottom="40dp"
+        ap:graphMarginLeft="15dp"
+        ap:graphMarginRight="10dp"
+        ap:graphDomainLineColor="#FFFFFF"
+        ap:graphDomainLineThickness="1dp"
+        ap:graphRangeLineColor="#FFFFFF"
+        ap:graphRangeLineThickness="1dp"
+        ap:rangeTickLabelTextSize="15sp"
+        ap:rangeOriginTickLabelTextSize="15sp"
+        ap:domainTickLabelTextSize="15sp"
+        ap:domainOriginTickLabelTextSize="15sp"
+        ap:legendTextSize="15sp"
+        ap:legendIconHeight="15dp"
+        ap:legendIconWidth="15dp"
+        ap:legendHeight="25dp"
+        ap:legendAnchorPosition="right_bottom"
+        android:layout_below="@+id/btnView"
+        android:layout_alignParentStart="true"
+        android:layout_above="@+id/speed"
+        android:layout_alignEnd="@+id/btnView" />
 
     <TextView
         android:id="@+id/speed"
@@ -60,4 +101,13 @@
         android:text="Save Run"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true" />
+
+    <Button
+        android:id="@+id/btnView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:onClick="onClick_View"
+        android:text="View Runs"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true" />
 </RelativeLayout>

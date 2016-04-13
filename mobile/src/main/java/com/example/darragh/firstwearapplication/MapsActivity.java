@@ -71,6 +71,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private TextView speed;
     double mySpeed;
     ArrayList<Double> speedList = new ArrayList<Double>();
+    double[] speedArray;
 
     //Time Features
     Chronometer myChrono;
@@ -431,6 +432,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         intentFinished.putExtra("speed", avgSpeed);
         intentFinished.putExtra("time", finalText);
         intentFinished.putExtra("distance", finalDist);
+        intentFinished.putExtra("speedList", speedList);
         startActivity(intentFinished);
     }
 

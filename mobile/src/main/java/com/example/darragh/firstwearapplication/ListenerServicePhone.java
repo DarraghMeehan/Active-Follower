@@ -30,5 +30,4 @@ public class ListenerServicePhone extends WearableListenerService {
             super.onMessageReceived(messageEvent);
         }
     }
-
 }

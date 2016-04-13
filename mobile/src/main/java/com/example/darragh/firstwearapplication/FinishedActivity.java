@@ -1,5 +1,6 @@
 package com.example.darragh.firstwearapplication;
 
+import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.os.Bundle;
@@ -8,6 +9,8 @@ import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.androidplot.xy.XYPlot;
 
 import java.text.DecimalFormat;
 
@@ -18,9 +21,13 @@ public class FinishedActivity extends FragmentActivity {
     private TextView finalDistance;
     private TextView finalTime;
 
+    private XYPlot plot;
+
     String speed;
     String distance;
     String time;
+    //private double[] speedList = new double[];
+    //double[] speedList = new double[a];
 
     SQLiteDatabase db;
 
@@ -28,6 +35,8 @@ public class FinishedActivity extends FragmentActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.finished_phone);
+
+        plot = (XYPlot) findViewById(R.id.plot);
 
         finalSpeed = (TextView) findViewById(R.id.speed);
         finalDistance = (TextView) findViewById(R.id.distance);
@@ -49,12 +58,25 @@ public class FinishedActivity extends FragmentActivity {
 
             time = extras.getString("time");
             finalTime.setText(time);
+
+            //speedList = extras.getDoubleArray("speedList");
+            convertArray();
+
+            //XYSeries series1 = new SimpleXYSeries(Arrays.<double[]>asList(list),
+                    //SimpleXYSeries.ArrayFormat.Y_VALS_ONLY, "Series1");
         }
+
+        openDatabase(); // open (create if needed) database
+    }
+
+    private void convertArray() {
+
+        //double[] list = new double[]
     }
 
     @Override
     public void onPause() {
-        dropTable();
+        //dropTable();
         super.onPause();
     }
 
@@ -65,12 +87,12 @@ public class FinishedActivity extends FragmentActivity {
 
     private void openDatabase() {
 
-        Log.i("FinishedActivity", "Open the Database");
+        Log.d("FinishedActivity", "Open the Database");
         try {
             // path to private memory
             String SDcardPath = "data/data/com.example.darragh.firstwearapplication";
             String myDBPath = SDcardPath + "/" + "myActivity.db";
-            Log.i("FinishedActivity", "DB Path: " + myDBPath);
+            Log.d("FinishedActivity", "DB Path: " + myDBPath);
 
             db = SQLiteDatabase.openDatabase(myDBPath, null,
                     SQLiteDatabase.CREATE_IF_NECESSARY);
@@ -83,7 +105,7 @@ public class FinishedActivity extends FragmentActivity {
 
     public void dropTable() {
 
-        Log.i("FinishedActivity", "Drop the table");
+        Log.d("FinishedActivity", "Drop the table");
         //db.beginTransaction();
         try {
             db.execSQL("drop table if exists tblActivity;");
@@ -100,16 +122,19 @@ public class FinishedActivity extends FragmentActivity {
         t.show();
 
         try{
-
-            openDatabase(); // open (create if needed) database
-            dropTable(); // if needed drop table tblActivity
+            //dropTable(); // if needed drop table tblActivity
             insertData();
         }
         catch(Exception e){
             finish();
         }
+        //end();
+    }
 
-        end();
+    public void onClick_View(View v) {
+
+        Intent myIntent = new Intent(FinishedActivity.this, ViewDB.class);
+        startActivity(myIntent);
     }
 
     private void insertData() {
@@ -117,12 +142,12 @@ public class FinishedActivity extends FragmentActivity {
         // create table: tblAmigo
         db.beginTransaction();
         try {
-            Log.i("FinishedActivity", "Pre Table");
+            Log.d("FinishedActivity", "Pre Table");
             // create table
-            db.execSQL("create table tblActivity ("
+            db.execSQL("create table if not exists tblActivity("
                     + " recID integer PRIMARY KEY autoincrement, "
                     + "speed  text, " + "distance text, " + "time text);");
-            Log.i("FinishedActivity", "Post Table");
+            Log.d("FinishedActivity", "Post Table");
             // commit your changes
             db.setTransactionSuccessful();
         }
@@ -136,7 +161,6 @@ public class FinishedActivity extends FragmentActivity {
         // populate table: tblAmigo
         db.beginTransaction();
         try {
-
             String myInfo = "insert into tblActivity(speed, distance, time) "
                     + " values ('"+speed+"', '"+distance+"', '"+time+"' );";
             db.execSQL(myInfo);
@@ -145,7 +169,7 @@ public class FinishedActivity extends FragmentActivity {
             db.setTransactionSuccessful();
         }
         catch (SQLiteException e2) {
-            //finish();
+            finish();
         }
         finally {
             db.endTransaction();
