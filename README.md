@@ -30,6 +30,8 @@ TODO: Write history
 
 [Icons8 - App Icon/Logo](https://icons8.com/ "Android Icon")
 
+[Phil Jay - Speed Graphing](https://www.numetriclabz.com/android-line-chart-using-mpandroidchart-tutorial/ "Phil Jay")
+
 ## License
 TODO: Write license
 
