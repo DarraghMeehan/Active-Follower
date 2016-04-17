@@ -39,6 +39,8 @@ import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.wearable.MessageApi;
@@ -89,6 +91,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     //Tracking user location
     List<LatLng> routePoints = new ArrayList<>();
+    private List<Marker> markerList = new ArrayList<>();
     PolylineOptions options = new PolylineOptions()
             .width(10)
             .color(BLUE)
@@ -398,6 +401,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         //Save the current time
         timeWhenPaused = myChrono.getBase() - SystemClock.elapsedRealtime();
         myChrono.stop();
+
+        LatLngBounds.Builder boundsBuilder = new LatLngBounds.Builder();
+        boundsBuilder.include(routePoints.get(0));
+        int last = routePoints.size();
+        boundsBuilder.include(routePoints.get(last-1));
+
+        LatLngBounds bounds = boundsBuilder.build();
+        map.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds,0));
     }
 
     public void play(){

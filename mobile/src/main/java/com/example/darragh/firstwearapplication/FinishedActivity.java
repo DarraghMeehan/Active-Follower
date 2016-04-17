@@ -3,6 +3,7 @@ package com.example.darragh.firstwearapplication;
 import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
@@ -88,9 +89,12 @@ public class FinishedActivity extends FragmentActivity {
             labels.add("label " + i);
         }
         LineDataSet dataset = new LineDataSet(entries, "Speed");
+        dataset.setColor(Color.MAGENTA);
+        dataset.setDrawFilled(true);
 
         LineData data = new LineData(labels, dataset);
         lineChart.setData(data); // set the data and list of lables into chart
+        lineChart.setDescription("Speed data");  // set the description
     }
 
     @Override
