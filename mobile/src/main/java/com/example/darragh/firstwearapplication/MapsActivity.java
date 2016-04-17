@@ -70,7 +70,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     //Speed Variables
     private TextView speed;
     double mySpeed;
-    ArrayList<Double> speedList = new ArrayList<Double>();
+    ArrayList<Double> speedList = new ArrayList<>();
     double[] speedArray;
 
     //Time Features

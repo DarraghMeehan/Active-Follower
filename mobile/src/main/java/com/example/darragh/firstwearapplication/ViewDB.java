@@ -39,6 +39,7 @@ public class ViewDB extends FragmentActivity{
 
         db = SQLiteDatabase.openDatabase(myDbPath, null,
                 SQLiteDatabase.OPEN_READONLY);
+        Log.d("viewDB", "DB Open");
 
         try {
             Log.d("viewDB", "Pre SHOW Table");
@@ -56,14 +57,17 @@ public class ViewDB extends FragmentActivity{
             Log.d("viewDB", "Try to show Table");
             String select = "select * from " + tableName ;
             Cursor cursor = db.rawQuery(select, null);
+            //String[] myArray = new String[] {}
 
+            Log.d("viewDB", "Next should print");
             if(cursor.moveToFirst()){
                 Log.d("viewDB", "First");
                 do {
+                    text.setText(cursor.getString(3));
                     //int index = cursor.getInt(cursor.getColumnIndex("recID"));
-                    String speed = cursor.getString(cursor.getColumnIndex("speed"));
-                    String distance = cursor.getString(cursor.getColumnIndex("distance"));
-                    String time = cursor.getString(cursor.getColumnIndex("time"));
+                    //String speed = cursor.getString(cursor.getColumnIndex("speed"));
+                    //String distance = cursor.getString(cursor.getColumnIndex("distance"));
+                    //String time = cursor.getString(cursor.getColumnIndex("time"));
                     //items.add("Speed: " + speed + "\nDistance: " + distance + "Time: " + time);
                 }
                 while(cursor.moveToNext());

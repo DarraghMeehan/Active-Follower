@@ -6,7 +6,7 @@
     <TextView
         android:id="@+id/txtMsg"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="126dp" />
 
     <ListView
         android:id="@+id/activityListView"
