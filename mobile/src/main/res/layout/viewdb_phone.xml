@@ -3,11 +3,6 @@
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <TextView
-        android:id="@+id/txtMsg"
-        android:layout_width="match_parent"
-        android:layout_height="126dp" />
-
     <ListView
         android:id="@+id/activityListView"
         android:layout_width="match_parent"

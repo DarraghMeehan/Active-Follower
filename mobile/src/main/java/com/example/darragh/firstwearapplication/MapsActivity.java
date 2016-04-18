@@ -104,8 +104,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         setContentView(R.layout.activity_phone);
 
         // Build a new GoogleApiClient that includes the Wearable API
-        // ATTENTION: This "addApi(AppIndex.API)"was auto-generated to implement the App Indexing API.
-        // See https://g.co/AppIndexing/AndroidStudio for more information.
         googleClient = new GoogleApiClient.Builder(this)
                 .addApi(Wearable.API)
                 .addApi(LocationServices.API)
@@ -120,6 +118,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         map = ((MapFragment) getFragmentManager().findFragmentById(R.id.map)).getMap();
 
+        //Initialise values of text areas
         speed = (TextView) findViewById(R.id.speed);
         speed.setText(0 + " km/h");
         distance = (TextView) findViewById(R.id.distance);
@@ -145,10 +144,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 routePoints.add(mapPoint);
 
                 if (status) {
-
                     //Take location & read speed info
                     getSpeed(location);
-
                     //Take locations array & read distance info
                     getLocation(location);
                 } else ;
@@ -205,6 +202,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 startActivity(locationIntent);
             }
         };
+        //Needed for Google maps use
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 requestPermissions(new String[]{
@@ -215,13 +213,16 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
             return;
         }
+        //To allow the use of Google maps
         locationManager.requestLocationUpdates("gps", 500, 1, locationListener);
+
         // Register the local broadcast receiver
         IntentFilter messageFilter = new IntentFilter(Intent.ACTION_SEND);
         MessageReceiver messageReceiver = new MessageReceiver();
         LocalBroadcastManager.getInstance(this).registerReceiver(messageReceiver, messageFilter);
     }
 
+    //Reading messages coming from the watch
     public class MessageReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -335,6 +336,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         return true;
     }
 
+    //Send messages to the watch
     class SendToDataLayerThread extends Thread {
 
         String path;
@@ -402,13 +404,17 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         timeWhenPaused = myChrono.getBase() - SystemClock.elapsedRealtime();
         myChrono.stop();
 
-        LatLngBounds.Builder boundsBuilder = new LatLngBounds.Builder();
-        boundsBuilder.include(routePoints.get(0));
         int last = routePoints.size();
-        boundsBuilder.include(routePoints.get(last-1));
+        if(last>=2){
 
-        LatLngBounds bounds = boundsBuilder.build();
-        map.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds,0));
+            LatLngBounds.Builder boundsBuilder = new LatLngBounds.Builder();
+            boundsBuilder.include(routePoints.get(0));
+            boundsBuilder.include(routePoints.get(last-1));
+
+            LatLngBounds bounds = boundsBuilder.build();
+            map.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds,0));
+        }
+        else;
     }
 
     public void play(){
