@@ -39,6 +39,8 @@ import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.wearable.MessageApi;
@@ -65,12 +67,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     //Distance Variables
     static double totalDist = 0;
     double totalDistance;
+    private TextView distance;
 
     //Speed Variables
     private TextView speed;
-    private TextView distance;
     double mySpeed;
-    ArrayList<Double> speedList = new ArrayList<Double>();
+    ArrayList<Double> speedList = new ArrayList<>();
+    double[] speedArray;
 
     //Time Features
     Chronometer myChrono;
@@ -88,6 +91,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     //Tracking user location
     List<LatLng> routePoints = new ArrayList<>();
+    private List<Marker> markerList = new ArrayList<>();
     PolylineOptions options = new PolylineOptions()
             .width(10)
             .color(BLUE)
@@ -100,8 +104,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         setContentView(R.layout.activity_phone);
 
         // Build a new GoogleApiClient that includes the Wearable API
-        // ATTENTION: This "addApi(AppIndex.API)"was auto-generated to implement the App Indexing API.
-        // See https://g.co/AppIndexing/AndroidStudio for more information.
         googleClient = new GoogleApiClient.Builder(this)
                 .addApi(Wearable.API)
                 .addApi(LocationServices.API)
@@ -116,12 +118,17 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         map = ((MapFragment) getFragmentManager().findFragmentById(R.id.map)).getMap();
 
+        //Initialise values of text areas
         speed = (TextView) findViewById(R.id.speed);
         speed.setText(0 + " km/h");
         distance = (TextView) findViewById(R.id.distance);
         distance.setText(0 + " km");
         myChrono = (Chronometer) findViewById(R.id.chronometer);
         myChrono.setText("00:00");
+
+        //Send message to Watch
+        String message = "Create";
+        new SendToDataLayerThread("/message_path", message).start();
 
         //Calling the Location Service
         locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
@@ -137,10 +144,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 routePoints.add(mapPoint);
 
                 if (status) {
-
                     //Take location & read speed info
                     getSpeed(location);
-
                     //Take locations array & read distance info
                     getLocation(location);
                 } else ;
@@ -197,6 +202,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 startActivity(locationIntent);
             }
         };
+        //Needed for Google maps use
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 requestPermissions(new String[]{
@@ -207,13 +213,16 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
             return;
         }
+        //To allow the use of Google maps
         locationManager.requestLocationUpdates("gps", 500, 1, locationListener);
+
         // Register the local broadcast receiver
         IntentFilter messageFilter = new IntentFilter(Intent.ACTION_SEND);
         MessageReceiver messageReceiver = new MessageReceiver();
         LocalBroadcastManager.getInstance(this).registerReceiver(messageReceiver, messageFilter);
     }
 
+    //Reading messages coming from the watch
     public class MessageReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -327,6 +336,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         return true;
     }
 
+    //Send messages to the watch
     class SendToDataLayerThread extends Thread {
 
         String path;
@@ -393,6 +403,18 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         //Save the current time
         timeWhenPaused = myChrono.getBase() - SystemClock.elapsedRealtime();
         myChrono.stop();
+
+        int last = routePoints.size();
+        if(last>=2){
+
+            LatLngBounds.Builder boundsBuilder = new LatLngBounds.Builder();
+            boundsBuilder.include(routePoints.get(0));
+            boundsBuilder.include(routePoints.get(last-1));
+
+            LatLngBounds bounds = boundsBuilder.build();
+            map.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds,0));
+        }
+        else;
     }
 
     public void play(){
@@ -427,6 +449,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         intentFinished.putExtra("speed", avgSpeed);
         intentFinished.putExtra("time", finalText);
         intentFinished.putExtra("distance", finalDist);
+        intentFinished.putExtra("speedList", speedList);
         startActivity(intentFinished);
     }
 
