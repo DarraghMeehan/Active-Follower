@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.GestureDetector;
+import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.TextView;
@@ -27,6 +28,10 @@ public class Home extends FragmentActivity {
         welcome = (TextView) findViewById(R.id.welcome);
         welcome.setOnTouchListener(gestureListener);
 
+        Toast t = Toast.makeText(Home.this, "Swipe Left to Begin", Toast.LENGTH_LONG);
+        t.setGravity(Gravity.CENTER,0,0);
+        t.show();
+
         gestureDetector = new GestureDetector(new SwipeGestureDetector());
         gestureListener = new View.OnTouchListener() {
             public boolean onTouch(View v, MotionEvent event) {
@@ -46,7 +51,6 @@ public class Home extends FragmentActivity {
     private void onLeftSwipe() {
 
         Intent myIntent = new Intent(Home.this, MapsActivity.class);
-        //FragmentActivity myActivity = new FragmentActivity(startActivity(MapsActivity));
         startActivity(myIntent);
     }
 

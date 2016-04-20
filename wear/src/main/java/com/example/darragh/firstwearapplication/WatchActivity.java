@@ -340,4 +340,8 @@ public class WatchActivity extends WearableActivity implements
 
         setContentView(R.layout.finished_watch);
     }
+
+    public void onDestroy() {
+        super.onDestroy();
+    }
 }
