@@ -16,7 +16,5 @@ Run history is stored within an SQLite database.
 
 [Phil Jay - Speed Graphing](https://www.numetriclabz.com/android-line-chart-using-mpandroidchart-tutorial/ "Phil Jay")
 
-## License
-TODO: Write license
 
 [logo]: https://github.com/DarraghMeehan/MyWearApplication/blob/master/mobile/src/main/res/mipmap-hdpi/ic_launcher.png "Logo Title Text 1"
