@@ -1,4 +1,4 @@
-# MyWearApplication ![alt text][logo]
+# MyWearApplication ![alt text][logo] # Final Year Project
 
 Android wear application using an Android Smartphone alongside an Android Wearable to track a user activity during a run, walk, cycle etc.
 
