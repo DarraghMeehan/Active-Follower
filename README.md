@@ -8,22 +8,6 @@ An android watch gives up to date information on speed, distance and time to the
 
 Run history is stored within an SQLite database.
 
-## Installation
-TODO: Describe the installation process
-
-## Usage
-TODO: Write usage instructions
-
-## Contributing
-1. Fork it!
-2. Create your feature branch: `git checkout -b my-new-feature`
-3. Commit your changes: `git commit -am 'Add some feature'`
-4. Push to the branch: `git push origin my-new-feature`
-5. Submit a pull request :D
-
-## History
-TODO: Write history
-
 ## Credits
 
 [Google Maps API](https://developers.google.com/maps/documentation/android-api/ "Google Maps")
