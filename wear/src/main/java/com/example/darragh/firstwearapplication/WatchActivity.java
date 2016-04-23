@@ -216,7 +216,7 @@ public class WatchActivity extends WearableActivity implements
 
         double earthRadius = 6371;
         double dLat = Math.toRadians(lat2 - lat1);
-        double dLng = Math.toRadians(lng2-lng1);
+        double dLng = Math.toRadians(lng2 - lng1);
         double a = Math.sin(dLat/2) * Math.sin(dLat/2) +
                 Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2)) *
                         Math.sin(dLng/2) * Math.sin(dLng/2);
@@ -284,7 +284,8 @@ public class WatchActivity extends WearableActivity implements
 
             NodeApi.GetConnectedNodesResult nodes = Wearable.NodeApi.getConnectedNodes(googleApiClient).await();
             for (Node node : nodes.getNodes()) {
-                MessageApi.SendMessageResult result = Wearable.MessageApi.sendMessage(googleApiClient, node.getId(), path, message.getBytes()).await();
+                MessageApi.SendMessageResult result =
+                        Wearable.MessageApi.sendMessage(googleApiClient, node.getId(), path, message.getBytes()).await();
                 if (result.getStatus().isSuccess()) {
                     Log.v("Watch", "Message: {" + message + "} sent to: " + node.getDisplayName());
                 } else {
@@ -300,13 +301,13 @@ public class WatchActivity extends WearableActivity implements
         //Changes the status of the button
         if (status) {
             pause();
-            //Send message to watch
+            //Send message to Phone
             String message = "Pause";
             new SendToDataLayerThread("/message_path", message).start();
         }
         else {
             play();
-            //Send message to watch
+            //Send message to Phone
             String message = "Start";
             new SendToDataLayerThread("/message_path", message).start();
         }

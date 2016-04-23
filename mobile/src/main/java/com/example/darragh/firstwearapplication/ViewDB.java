@@ -18,8 +18,6 @@ import java.util.ArrayList;
  */
 public class ViewDB extends FragmentActivity{
 
-    private static final String myDBTable = "myActivityTable";
-
     ListView activityList;
     ArrayList<String> returnedList;
 
@@ -29,13 +27,12 @@ public class ViewDB extends FragmentActivity{
         setContentView(R.layout.viewdb_phone);
 
         final MyDBHelper myDB = new MyDBHelper(this);
-
         activityList = (ListView) findViewById(R.id.activityListView);
 
         try {
             Log.d("viewDB", "Pre SHOW Table");
             returnedList = myDB.showTable(); //retrieve all rows from a table
-            final ArrayAdapter<String> myAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, returnedList);
+            ArrayAdapter<String> myAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, returnedList);
             activityList.setAdapter(myAdapter);
 
             activityList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -53,12 +50,17 @@ public class ViewDB extends FragmentActivity{
                             myDB.deleteEntry(positionToRemove);
                             Toast t = Toast.makeText(ViewDB.this, "Value of Position: " + positionToRemove, Toast.LENGTH_LONG);
                             t.show();
-                            myAdapter.notifyDataSetChanged();
+                            //myAdapter.notifyDataSetChanged();
+                            //activityList.invalidateViews();
+                            //myAdapter.notifyDataSetChanged();
                         }
                     });
                     adb.show();
+                    //myAdapter.notifyDataSetChanged();
                 }
             });
+            myAdapter.notifyDataSetChanged();
+            returnedList = myDB.showTable(); //retrieve all rows from a table
         }
         catch (Exception e) {
             finish();

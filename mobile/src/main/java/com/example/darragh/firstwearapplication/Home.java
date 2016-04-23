@@ -5,7 +5,6 @@ import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.GestureDetector;
-import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.TextView;
@@ -28,10 +27,6 @@ public class Home extends FragmentActivity {
         welcome = (TextView) findViewById(R.id.welcome);
         welcome.setOnTouchListener(gestureListener);
 
-        Toast t = Toast.makeText(Home.this, "Swipe Left to Begin", Toast.LENGTH_LONG);
-        t.setGravity(Gravity.CENTER,0,0);
-        t.show();
-
         gestureDetector = new GestureDetector(new SwipeGestureDetector());
         gestureListener = new View.OnTouchListener() {
             public boolean onTouch(View v, MotionEvent event) {
@@ -50,6 +45,8 @@ public class Home extends FragmentActivity {
 
     private void onLeftSwipe() {
 
+        Toast t = Toast.makeText(Home.this, "Gesture detected", Toast.LENGTH_SHORT);
+        t.show();
         Intent myIntent = new Intent(Home.this, MapsActivity.class);
         startActivity(myIntent);
     }
@@ -63,8 +60,6 @@ public class Home extends FragmentActivity {
         public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX,
                                float velocityY) {
             try {
-                Toast t = Toast.makeText(Home.this, "Gesture detected", Toast.LENGTH_SHORT);
-                t.show();
                 float diffAbs = Math.abs(e1.getY() - e2.getY());
                 float diff = e1.getX() - e2.getX();
 
@@ -77,7 +72,8 @@ public class Home extends FragmentActivity {
                     Home.this.onLeftSwipe();
                     Log.e("Home", "Left detected");
                 }
-            } catch (Exception e) {
+            }
+            catch (Exception e) {
                 Log.e("Home", "Error on gestures");
             }
             return false;

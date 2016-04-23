@@ -88,6 +88,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private GoogleMap map;
     private LocationManager locationManager;
     private LocationListener locationListener;
+    private boolean firstTime = false;
 
     //Tracking user location
     List<LatLng> routePoints = new ArrayList<>();
@@ -380,15 +381,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
         //Toggle the status of the stopwatch
         status = !status;
-
-        //Drop Yellow marker at paused position
-        map.setMapType(GoogleMap.MAP_TYPE_NORMAL);
-        LatLng pauseLocation = new LatLng(latitude, longitude);
-        CameraUpdate update = CameraUpdateFactory.newLatLngZoom(pauseLocation, 17);
-        map.addMarker(new MarkerOptions().position(pauseLocation)
-                .icon(BitmapDescriptorFactory
-                        .defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
-        map.animateCamera(update);
     }
 
     public void pause(){
@@ -404,15 +396,27 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         timeWhenPaused = myChrono.getBase() - SystemClock.elapsedRealtime();
         myChrono.stop();
 
+        LatLng pauseLocation = new LatLng(latitude, longitude);
+        map.addMarker(new MarkerOptions().position(pauseLocation)
+                .icon(BitmapDescriptorFactory
+                        .defaultMarker(BitmapDescriptorFactory.HUE_YELLOW)));
+
         int last = routePoints.size();
         if(last>=2){
 
             LatLngBounds.Builder boundsBuilder = new LatLngBounds.Builder();
             boundsBuilder.include(routePoints.get(0));
+            boundsBuilder.include(routePoints.get(last/8));
+            boundsBuilder.include(routePoints.get(last/4));
+            boundsBuilder.include(routePoints.get((last/8)*3));
+            boundsBuilder.include(routePoints.get(last/2));
+            boundsBuilder.include(routePoints.get((last/8)*5));
+            boundsBuilder.include(routePoints.get((last/4)*3));
+            boundsBuilder.include(routePoints.get((last/8)*7));
             boundsBuilder.include(routePoints.get(last-1));
 
             LatLngBounds bounds = boundsBuilder.build();
-            map.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds,0));
+            map.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds,12));
         }
         else;
     }
@@ -429,6 +433,21 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         //Resume time count from previous time.
         myChrono.setBase(SystemClock.elapsedRealtime() + timeWhenPaused);
         myChrono.start();
+
+        if(firstTime == false){
+
+            //Drop Green marker at start position
+            map.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+            LatLng startLocation = new LatLng(latitude, longitude);
+            routePoints.add(startLocation);
+            options.add(startLocation);
+            CameraUpdate update = CameraUpdateFactory.newLatLngZoom(startLocation, 17);
+            map.addMarker(new MarkerOptions().position(startLocation)
+                    .icon(BitmapDescriptorFactory
+                            .defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
+            map.animateCamera(update);
+            firstTime = true;
+        }
     }
 
     public void onClick_Finish(View v) {

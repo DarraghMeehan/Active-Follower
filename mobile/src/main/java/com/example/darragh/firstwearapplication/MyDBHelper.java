@@ -104,7 +104,7 @@ public class MyDBHelper extends SQLiteOpenHelper {
 
         SQLiteDatabase db = this.getWritableDatabase();
         String query = "UPDATE " + myDBTable + " SET " + tblID + " = (recID - 1) WHERE recID > " + ID;
-        String whereClause = "recID = " + ID;
+        String whereClause = tblID + " = " + ID;
         db.delete(myDBTable, whereClause, null);
         db.execSQL(query);
     }
