@@ -100,28 +100,6 @@ public class WatchActivity extends WearableActivity implements
         LocalBroadcastManager.getInstance(this).registerReceiver(messageReceiver, messageFilter);
     }
 
-    public class MessageReceiver extends BroadcastReceiver {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-
-            String message = intent.getStringExtra("message");
-
-            if(message.equals("Start")){
-                //Show the button
-                activityButton.setVisibility(View.VISIBLE);
-                play();
-                status = !status;
-            }
-            else if(message.equals("Pause")) {
-                pause();
-                status = !status;
-            }
-            else if(message.equals("Finish")) {
-                end();
-            }
-        }
-    }
-
     // Connect to Google Play Services when the Activity starts
     @Override
     protected void onStart() {
@@ -145,6 +123,28 @@ public class WatchActivity extends WearableActivity implements
             googleApiClient.disconnect();
         }
         super.onStop();
+    }
+
+    public class MessageReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+
+            String message = intent.getStringExtra("message");
+
+            if(message.equals("Start")){
+                //Show the button
+                activityButton.setVisibility(View.VISIBLE);
+                play();
+                status = !status;
+            }
+            else if(message.equals("Pause")) {
+                pause();
+                status = !status;
+            }
+            else if(message.equals("Finish")) {
+                end();
+            }
+        }
     }
 
     // Register as a listener when connected
@@ -235,40 +235,6 @@ public class WatchActivity extends WearableActivity implements
         speed.setText(s + "km/h");
     }
 
-    @Override
-    public void onEnterAmbient(Bundle ambientDetails) {
-        super.onEnterAmbient(ambientDetails);
-        updateDisplay();
-    }
-
-    @Override
-    public void onUpdateAmbient() {
-        super.onUpdateAmbient();
-        updateDisplay();
-    }
-
-    @Override
-    public void onExitAmbient() {
-        updateDisplay();
-        super.onExitAmbient();
-    }
-
-    private void updateDisplay() {
-        if (isAmbient()) {
-            mContainerView.setBackgroundColor(getResources().getColor(android.R.color.black));
-            mTextView.setTextColor(getResources().getColor(android.R.color.white));
-            speed.setTextColor(getResources().getColor(android.R.color.white));
-            mClockView.setVisibility(View.VISIBLE);
-
-            mClockView.setText(AMBIENT_DATE_FORMAT.format(new Date()));
-        } else {
-            mContainerView.setBackground(null);
-            mTextView.setTextColor(getResources().getColor(android.R.color.black));
-            speed.setTextColor(getResources().getColor(android.R.color.black));
-            mClockView.setVisibility(View.GONE);
-        }
-    }
-
     class SendToDataLayerThread extends Thread {
 
         String path;
@@ -342,7 +308,42 @@ public class WatchActivity extends WearableActivity implements
         setContentView(R.layout.finished_watch);
     }
 
+    @Override
+    public void onEnterAmbient(Bundle ambientDetails) {
+        super.onEnterAmbient(ambientDetails);
+        updateDisplay();
+    }
+
+    @Override
+    public void onUpdateAmbient() {
+        super.onUpdateAmbient();
+        updateDisplay();
+    }
+
+    @Override
+    public void onExitAmbient() {
+        updateDisplay();
+        super.onExitAmbient();
+    }
+
+    private void updateDisplay() {
+        if (isAmbient()) {
+            mContainerView.setBackgroundColor(getResources().getColor(android.R.color.black));
+            mTextView.setTextColor(getResources().getColor(android.R.color.white));
+            speed.setTextColor(getResources().getColor(android.R.color.white));
+            mClockView.setVisibility(View.VISIBLE);
+
+            mClockView.setText(AMBIENT_DATE_FORMAT.format(new Date()));
+        } else {
+            mContainerView.setBackground(null);
+            mTextView.setTextColor(getResources().getColor(android.R.color.black));
+            speed.setTextColor(getResources().getColor(android.R.color.black));
+            mClockView.setVisibility(View.GONE);
+        }
+    }
+
     public void onDestroy() {
+
         super.onDestroy();
     }
 }

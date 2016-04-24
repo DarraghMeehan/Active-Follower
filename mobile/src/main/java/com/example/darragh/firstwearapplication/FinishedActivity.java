@@ -27,6 +27,7 @@ public class FinishedActivity extends FragmentActivity {
     private TextView finalSpeed;
     private TextView finalDistance;
     private TextView finalTime;
+    private boolean isSaved = false;
 
     String speed;
     String distance;
@@ -89,6 +90,30 @@ public class FinishedActivity extends FragmentActivity {
         lineChart.setDescription("Speed data");  // set the description
     }
 
+    public void onClick_Save(View v) {
+
+        if(isSaved == false) {
+
+            Toast toast = Toast.makeText(FinishedActivity.this, "Your activity has been saved!", Toast.LENGTH_SHORT);
+            toast.show();
+
+            String date = new SimpleDateFormat("dd/MM/yyyy").format(new Date());
+            myDB.insertData(date, speed, distance, time);
+
+            isSaved=true;
+        }
+        else {
+            Toast saved = Toast.makeText(FinishedActivity.this, "You have already saved this activity!", Toast.LENGTH_LONG);
+            saved.show();
+        }
+    }
+
+    public void onClick_View(View v) {
+
+        Intent myIntent = new Intent(FinishedActivity.this, ViewDB.class);
+        startActivity(myIntent);
+    }
+
     @Override
     public void onPause() {
 
@@ -97,21 +122,6 @@ public class FinishedActivity extends FragmentActivity {
 
     public void onDestroy() {
         super.onDestroy();
-    }
-
-    public void onClick_Save(View v) {
-
-        Toast t = Toast.makeText(FinishedActivity.this, "Your run has been saved!", Toast.LENGTH_SHORT);
-        t.show();
-
-        String date = new SimpleDateFormat("dd/MM/yyyy").format(new Date());
-        myDB.insertData(date, speed, distance, time);
-    }
-
-    public void onClick_View(View v) {
-
-        Intent myIntent = new Intent(FinishedActivity.this, ViewDB.class);
-        startActivity(myIntent);
     }
 
     @Override
