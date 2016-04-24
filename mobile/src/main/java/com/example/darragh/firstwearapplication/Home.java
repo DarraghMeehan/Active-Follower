@@ -54,7 +54,7 @@ public class Home extends FragmentActivity {
     private class SwipeGestureDetector extends GestureDetector.SimpleOnGestureListener {
         private static final int SWIPE_MIN_DISTANCE = 50;
         private static final int SWIPE_MAX_OFF_PATH = 200;
-        private static final int SWIPE_THRESHOLD_VELOCITY = 200;
+        private static final int SWIPE_THRESHOLD = 200;
 
         @Override
         public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX,
@@ -68,7 +68,7 @@ public class Home extends FragmentActivity {
 
                 // Left swipe
                 if (diff > SWIPE_MIN_DISTANCE
-                        && Math.abs(velocityX) > SWIPE_THRESHOLD_VELOCITY) {
+                        && Math.abs(velocityX) > SWIPE_THRESHOLD) {
                     Home.this.onLeftSwipe();
                     Log.e("Home", "Left detected");
                 }
