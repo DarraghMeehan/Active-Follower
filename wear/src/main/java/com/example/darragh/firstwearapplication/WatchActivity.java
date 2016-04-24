@@ -100,28 +100,6 @@ public class WatchActivity extends WearableActivity implements
         LocalBroadcastManager.getInstance(this).registerReceiver(messageReceiver, messageFilter);
     }
 
-    public class MessageReceiver extends BroadcastReceiver {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-
-            String message = intent.getStringExtra("message");
-
-            if(message.equals("Start")){
-                //Show the button
-                activityButton.setVisibility(View.VISIBLE);
-                play();
-                status = !status;
-            }
-            else if(message.equals("Pause")) {
-                pause();
-                status = !status;
-            }
-            else if(message.equals("Finish")) {
-                end();
-            }
-        }
-    }
-
     // Connect to Google Play Services when the Activity starts
     @Override
     protected void onStart() {
@@ -145,6 +123,28 @@ public class WatchActivity extends WearableActivity implements
             googleApiClient.disconnect();
         }
         super.onStop();
+    }
+
+    public class MessageReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+
+            String message = intent.getStringExtra("message");
+
+            if(message.equals("Start")){
+                //Show the button
+                activityButton.setVisibility(View.VISIBLE);
+                play();
+                status = !status;
+            }
+            else if(message.equals("Pause")) {
+                pause();
+                status = !status;
+            }
+            else if(message.equals("Finish")) {
+                end();
+            }
+        }
     }
 
     // Register as a listener when connected
@@ -216,7 +216,7 @@ public class WatchActivity extends WearableActivity implements
 
         double earthRadius = 6371;
         double dLat = Math.toRadians(lat2 - lat1);
-        double dLng = Math.toRadians(lng2-lng1);
+        double dLng = Math.toRadians(lng2 - lng1);
         double a = Math.sin(dLat/2) * Math.sin(dLat/2) +
                 Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2)) *
                         Math.sin(dLng/2) * Math.sin(dLng/2);
@@ -233,6 +233,79 @@ public class WatchActivity extends WearableActivity implements
         DecimalFormat speedFormat = new DecimalFormat("##.##");
         String s = speedFormat.format(mySpeed);
         speed.setText(s + "km/h");
+    }
+
+    class SendToDataLayerThread extends Thread {
+
+        String path;
+        String message;
+
+        // Constructor to send a message to the data layer
+        SendToDataLayerThread(String p, String msg) {
+            path = p;
+            message = msg;
+        }
+
+        public void run() {
+
+            NodeApi.GetConnectedNodesResult nodes = Wearable.NodeApi.getConnectedNodes(googleApiClient).await();
+            for (Node node : nodes.getNodes()) {
+                MessageApi.SendMessageResult result =
+                        Wearable.MessageApi.sendMessage(googleApiClient, node.getId(), path, message.getBytes()).await();
+                if (result.getStatus().isSuccess()) {
+                    Log.v("Watch", "Message: {" + message + "} sent to: " + node.getDisplayName());
+                } else {
+                    // Log an error
+                    Log.v("Watch", "ERROR: failed to send Message");
+                }
+            }
+        }
+    }
+
+    public void onClick_Watch(View v) {
+
+        //Changes the status of the button
+        if (status) {
+            pause();
+            //Send message to Phone
+            String message = "Pause";
+            new SendToDataLayerThread("/message_path", message).start();
+        }
+        else {
+            play();
+            //Send message to Phone
+            String message = "Start";
+            new SendToDataLayerThread("/message_path", message).start();
+        }
+        //Toggle the status of the stopwatch
+        status = !status;
+    }
+
+    public void pause(){
+
+        //Changes the text and the colour of the button
+        activityButton.setText("Resume");
+        activityButton.getBackground().setColorFilter(Color.GREEN, PorterDuff.Mode.MULTIPLY);
+
+        //Save the current time
+        timeWhenPaused = myChrono.getBase() - SystemClock.elapsedRealtime();
+        myChrono.stop();
+    }
+
+    public void play(){
+
+        //Changes the text and the colour of the button
+        activityButton.setText("Pause");
+        activityButton.getBackground().setColorFilter(Color.YELLOW, PorterDuff.Mode.MULTIPLY);
+
+        //Resume time count from previous time.
+        myChrono.setBase(SystemClock.elapsedRealtime() + timeWhenPaused);
+        myChrono.start();
+    }
+
+    public void end(){
+
+        setContentView(R.layout.finished_watch);
     }
 
     @Override
@@ -269,75 +342,8 @@ public class WatchActivity extends WearableActivity implements
         }
     }
 
-    class SendToDataLayerThread extends Thread {
+    public void onDestroy() {
 
-        String path;
-        String message;
-
-        // Constructor to send a message to the data layer
-        SendToDataLayerThread(String p, String msg) {
-            path = p;
-            message = msg;
-        }
-
-        public void run() {
-
-            NodeApi.GetConnectedNodesResult nodes = Wearable.NodeApi.getConnectedNodes(googleApiClient).await();
-            for (Node node : nodes.getNodes()) {
-                MessageApi.SendMessageResult result = Wearable.MessageApi.sendMessage(googleApiClient, node.getId(), path, message.getBytes()).await();
-                if (result.getStatus().isSuccess()) {
-                    Log.v("Watch", "Message: {" + message + "} sent to: " + node.getDisplayName());
-                } else {
-                    // Log an error
-                    Log.v("Watch", "ERROR: failed to send Message");
-                }
-            }
-        }
-    }
-
-    public void onClick_Watch(View v) {
-
-        //Changes the status of the button
-        if (status) {
-            pause();
-            //Send message to watch
-            String message = "Pause";
-            new SendToDataLayerThread("/message_path", message).start();
-        }
-        else {
-            play();
-            //Send message to watch
-            String message = "Start";
-            new SendToDataLayerThread("/message_path", message).start();
-        }
-        //Toggle the status of the stopwatch
-        status = !status;
-    }
-
-    public void pause(){
-
-        //Changes the text and the colour of the button
-        activityButton.setText("Resume");
-        activityButton.getBackground().setColorFilter(Color.GREEN, PorterDuff.Mode.MULTIPLY);
-
-        //Save the current time
-        timeWhenPaused = myChrono.getBase() - SystemClock.elapsedRealtime();
-        myChrono.stop();
-    }
-
-    public void play(){
-
-        //Changes the text and the colour of the button
-        activityButton.setText("Pause");
-        activityButton.getBackground().setColorFilter(Color.YELLOW, PorterDuff.Mode.MULTIPLY);
-
-        //Resume time count from previous time.
-        myChrono.setBase(SystemClock.elapsedRealtime() + timeWhenPaused);
-        myChrono.start();
-    }
-
-    public void end(){
-
-        setContentView(R.layout.finished_watch);
+        super.onDestroy();
     }
 }

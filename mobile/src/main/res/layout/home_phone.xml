@@ -11,11 +11,12 @@
 
         <TextView
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="390dp"
             android:textAppearance="?android:attr/textAppearanceLarge"
-            android:text="Welcome"
+            android:text="Welcome!\nPlease Swipe Left to begin!"
+            android:textSize="40dp"
+            android:textStyle="bold"
             android:id="@+id/welcome"
-            android:layout_gravity="center_horizontal"
-            android:gravity="center_vertical|center" />
+            android:gravity="center" />
     </LinearLayout>
 </FrameLayout>

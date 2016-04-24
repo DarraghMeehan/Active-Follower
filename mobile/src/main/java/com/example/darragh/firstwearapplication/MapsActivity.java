@@ -40,7 +40,6 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
-import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.wearable.MessageApi;
@@ -73,7 +72,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private TextView speed;
     double mySpeed;
     ArrayList<Double> speedList = new ArrayList<>();
-    double[] speedArray;
 
     //Time Features
     Chronometer myChrono;
@@ -88,10 +86,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private GoogleMap map;
     private LocationManager locationManager;
     private LocationListener locationListener;
+    private boolean firstTime = false;
 
     //Tracking user location
     List<LatLng> routePoints = new ArrayList<>();
-    private List<Marker> markerList = new ArrayList<>();
     PolylineOptions options = new PolylineOptions()
             .width(10)
             .color(BLUE)
@@ -111,20 +109,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 .addOnConnectionFailedListener(this)
                 .addApi(AppIndex.API).build();
 
-        startButton = (Button) findViewById(R.id.btnStart);
-        finishButton = (Button) findViewById(R.id.btnFinish);
-        //Hide the finish button
-        finishButton.setVisibility(View.INVISIBLE);
-
-        map = ((MapFragment) getFragmentManager().findFragmentById(R.id.map)).getMap();
-
-        //Initialise values of text areas
-        speed = (TextView) findViewById(R.id.speed);
-        speed.setText(0 + " km/h");
-        distance = (TextView) findViewById(R.id.distance);
-        distance.setText(0 + " km");
-        myChrono = (Chronometer) findViewById(R.id.chronometer);
-        myChrono.setText("00:00");
+        //Initialises Buttons, TextViews, Chronometer & Map Fragment
+        initialise();
 
         //Send message to Watch
         String message = "Create";
@@ -222,6 +208,25 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         LocalBroadcastManager.getInstance(this).registerReceiver(messageReceiver, messageFilter);
     }
 
+    //Initialises Buttons, TextViews, Chronometer & Map Fragment
+    private void initialise() {
+
+        startButton = (Button) findViewById(R.id.btnStart);
+        finishButton = (Button) findViewById(R.id.btnFinish);
+        //Hide the finish button
+        finishButton.setVisibility(View.INVISIBLE);
+
+        map = ((MapFragment) getFragmentManager().findFragmentById(R.id.map)).getMap();
+
+        //Initialise values of text areas
+        speed = (TextView) findViewById(R.id.speed);
+        speed.setText(0 + " km/h");
+        distance = (TextView) findViewById(R.id.distance);
+        distance.setText(0 + " km");
+        myChrono = (Chronometer) findViewById(R.id.chronometer);
+        myChrono.setText("00:00");
+    }
+
     //Reading messages coming from the watch
     public class MessageReceiver extends BroadcastReceiver {
         @Override
@@ -268,73 +273,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     // Connect to the data layer when the Activity starts
-    @Override
-    protected void onStart() {
-
-        super.onStart();
-        googleClient.connect();
-        // ATTENTION: This was auto-generated to implement the App Indexing API.
-        // See https://g.co/AppIndexing/AndroidStudio for more information.
-        Action viewAction = Action.newAction(
-                Action.TYPE_VIEW, // TODO: choose an action type.
-                "Maps Page", // TODO: Define a title for the content shown.
-                // TODO: If you have web page content that matches this app activity's content,
-                // make sure this auto-generated web page URL is correct.
-                // Otherwise, set the URL to null.
-                Uri.parse("http://host/path"),
-                // TODO: Make sure this auto-generated app deep link URI is correct.
-                Uri.parse("android-app://com.example.darragh.firstwearapplication/http/host/path")
-        );
-        AppIndex.AppIndexApi.start(googleClient, viewAction);
-    }
-
-    // Send a message when the data layer connection is successful.
-    @Override
-    public void onConnected(Bundle connectionHint) {
-
-        String message = "Hello wearable\n Via the data layer";
-        //Requires a new thread to avoid blocking the UI
-        new SendToDataLayerThread("/message_path", message).start();
-    }
-
-    // Disconnect from the data layer when the Activity stops
-    @Override
-    protected void onStop() {
-
-        if (null != googleClient && googleClient.isConnected()) {
-            googleClient.disconnect();
-        }
-        super.onStop();
-        // ATTENTION: This was auto-generated to implement the App Indexing API.
-        // See https://g.co/AppIndexing/AndroidStudio for more information.
-        Action viewAction = Action.newAction(
-                Action.TYPE_VIEW, // TODO: choose an action type.
-                "Maps Page", // TODO: Define a title for the content shown.
-                // TODO: If you have web page content that matches this app activity's content,
-                // make sure this auto-generated web page URL is correct.
-                // Otherwise, set the URL to null.
-                Uri.parse("http://host/path"),
-                // TODO: Make sure this auto-generated app deep link URI is correct.
-                Uri.parse("android-app://com.example.darragh.firstwearapplication/http/host/path")
-        );
-        AppIndex.AppIndexApi.end(googleClient, viewAction);
-    }
-
-    // Placeholders for required connection callbacks
-    @Override
-    public void onConnectionSuspended(int cause) { }
-
-    @Override
-    public void onConnectionFailed(ConnectionResult connectionResult) { }
-
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-
-        // Inflate the menu; this adds items to the action bar if it is present.
-        //getMenuInflater().inflate(R.menu.main, menu);
-        return true;
-    }
 
     //Send messages to the watch
     class SendToDataLayerThread extends Thread {
@@ -380,15 +318,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
         //Toggle the status of the stopwatch
         status = !status;
-
-        //Drop Yellow marker at paused position
-        map.setMapType(GoogleMap.MAP_TYPE_NORMAL);
-        LatLng pauseLocation = new LatLng(latitude, longitude);
-        CameraUpdate update = CameraUpdateFactory.newLatLngZoom(pauseLocation, 17);
-        map.addMarker(new MarkerOptions().position(pauseLocation)
-                .icon(BitmapDescriptorFactory
-                        .defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
-        map.animateCamera(update);
     }
 
     public void pause(){
@@ -404,15 +333,24 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         timeWhenPaused = myChrono.getBase() - SystemClock.elapsedRealtime();
         myChrono.stop();
 
+        //Set a yellow marker on the current paused location
+        LatLng pauseLocation = new LatLng(latitude, longitude);
+        map.addMarker(new MarkerOptions().position(pauseLocation)
+                .icon(BitmapDescriptorFactory
+                        .defaultMarker(BitmapDescriptorFactory.HUE_YELLOW)));
+
+        //Zoom out to fit route points on the map.
+        //This shows the user the total distance travelled on the map
         int last = routePoints.size();
         if(last>=2){
 
             LatLngBounds.Builder boundsBuilder = new LatLngBounds.Builder();
-            boundsBuilder.include(routePoints.get(0));
-            boundsBuilder.include(routePoints.get(last-1));
+            for(int i=0; i<last; i++){
+                boundsBuilder.include(routePoints.get(i));
+            }
 
             LatLngBounds bounds = boundsBuilder.build();
-            map.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds,0));
+            map.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds,12));
         }
         else;
     }
@@ -429,6 +367,22 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         //Resume time count from previous time.
         myChrono.setBase(SystemClock.elapsedRealtime() + timeWhenPaused);
         myChrono.start();
+
+        //Only drop a green marker at the beginning of the activity
+        if(firstTime == false){
+
+            //Drop Green marker at start position
+            map.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+            LatLng startLocation = new LatLng(latitude, longitude);
+            routePoints.add(startLocation);
+            options.add(startLocation);
+            CameraUpdate update = CameraUpdateFactory.newLatLngZoom(startLocation, 17);
+            map.addMarker(new MarkerOptions().position(startLocation)
+                    .icon(BitmapDescriptorFactory
+                            .defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
+            map.animateCamera(update);
+            firstTime = true;
+        }
     }
 
     public void onClick_Finish(View v) {
@@ -442,6 +396,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         String finalText = myChrono.getText().toString();
         final double finalDist = totalDist;
 
+        //Take returned value from below function to calculate the average speed
         double avgSpeed = calculateAverageSpeed();
 
         //Start the final Activity
@@ -453,6 +408,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         startActivity(intentFinished);
     }
 
+    //Reads list of Speed values and calculates the average speed
     private double calculateAverageSpeed() {
 
         double total = 0;
@@ -462,6 +418,64 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
         double average = total/speedList.size();
         return(average);
+    }
+
+    @Override
+    protected void onStart() {
+
+        super.onStart();
+        googleClient.connect();
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        Action viewAction = Action.newAction(
+                Action.TYPE_VIEW,
+                "Maps Page",
+                Uri.parse("http://host/path"),
+                Uri.parse("android-app://com.example.darragh.firstwearapplication/http/host/path")
+        );
+        AppIndex.AppIndexApi.start(googleClient, viewAction);
+    }
+
+    // Disconnect from the data layer when the Activity stops
+    @Override
+    protected void onStop() {
+
+        if (null != googleClient && googleClient.isConnected()) {
+            googleClient.disconnect();
+        }
+        super.onStop();
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        Action viewAction = Action.newAction(
+                Action.TYPE_VIEW,
+                "Maps Page",
+                Uri.parse("http://host/path"),
+                Uri.parse("android-app://com.example.darragh.firstwearapplication/http/host/path")
+        );
+        AppIndex.AppIndexApi.end(googleClient, viewAction);
+    }
+
+    // Send a message when the data layer connection is successful.
+    @Override
+    public void onConnected(Bundle connectionHint) {
+
+        String message = "Hello wearable\n Via the data layer";
+        //Requires a new thread to avoid blocking the UI
+        new SendToDataLayerThread("/message_path", message).start();
+    }
+
+    // Placeholders for required connection callbacks
+    @Override
+    public void onConnectionSuspended(int cause) { }
+
+    @Override
+    public void onConnectionFailed(ConnectionResult connectionResult) { }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+
+        // Inflate the menu; this adds items to the action bar if it is present.
+        return true;
     }
 
     /**

@@ -13,10 +13,12 @@ import java.util.ArrayList;
  */
 public class MyDBHelper extends SQLiteOpenHelper {
 
+    //Database Values
     private static final String myDB = "activityDB";
     private static final int myVersion = 2;
     private static final String myDBTable = "myActivityTable";
 
+    //Database Strings
     private static final String tblID = "recID";
     private static final String tblDATE = "Date";
     private static final String tblSPEED = "Speed";
@@ -33,14 +35,13 @@ public class MyDBHelper extends SQLiteOpenHelper {
 
         if(instance == null)
             instance = new MyDBHelper(context.getApplicationContext());
-
         return instance;
     }
 
     @Override
     public void onCreate(SQLiteDatabase db) {
 
-        String myInfo = "create table if not exists " + myDBTable + "("
+        String myInfo = "create table IF NOT EXISTS " + myDBTable + "("
                 + tblID + " integer PRIMARY KEY AUTOINCREMENT,"
                 + tblDATE + " text,"
                 + tblSPEED + " text,"
@@ -52,6 +53,7 @@ public class MyDBHelper extends SQLiteOpenHelper {
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
 
+        //If the version of the database table changes, DROP previous
         if(oldVersion != newVersion){
             db.execSQL("DROP TABLE IF EXISTS" + myDBTable + ";");
             onCreate(db);
@@ -63,11 +65,16 @@ public class MyDBHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues myValues = new ContentValues();
 
+        //Add values of row contents to myValues
         myValues.put(tblDATE, date);
         myValues.put(tblSPEED, speed);
         myValues.put(tblDISTANCE, distance);
         myValues.put(tblTIME, time);
+
+        //Insert the data into the database
         db.insert(myDBTable, null, myValues);
+
+        //Close the database when done
         db.close();
     }
 
@@ -79,18 +86,26 @@ public class MyDBHelper extends SQLiteOpenHelper {
         Cursor cursor = db.rawQuery(query, null);
 
         if(cursor.moveToFirst()){
-
             do{
                 StringBuilder sb = new StringBuilder();
-                sb.append(cursor.getString(0) + " ");
-                sb.append(cursor.getString(1) + " ");
-                sb.append(cursor.getString(2) + " ");
-                sb.append(cursor.getString(3) + " ");
+                sb.append(cursor.getString(0) + " \n");
+                sb.append(cursor.getString(1) + " km/h - ");
+                sb.append(cursor.getString(2) + " km - ");
+                sb.append("Time: " + cursor.getString(3) + " ");
 
                 results.add(sb.toString());
             }
             while(cursor.moveToNext());
         }
         return results;
+    }
+
+    public void deleteEntry(int ID) {
+
+        SQLiteDatabase db = this.getWritableDatabase();
+        String query = "UPDATE " + myDBTable + " SET " + tblID + " = (recID - 1) WHERE recID > " + ID;
+        String whereClause = tblID + " = " + ID;
+        db.delete(myDBTable, whereClause, null);
+        db.execSQL(query);
     }
 }
