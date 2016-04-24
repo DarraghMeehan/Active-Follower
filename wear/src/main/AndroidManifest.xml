@@ -21,7 +21,7 @@
 
         <activity
             android:name=".WatchActivity"
-            android:label="@string/app_name"
+            android:label="Active Follower"
             android:theme="@android:style/Theme.DeviceDefault.Light">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

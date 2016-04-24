@@ -89,8 +89,8 @@ public class MyDBHelper extends SQLiteOpenHelper {
             do{
                 StringBuilder sb = new StringBuilder();
                 sb.append(" " + cursor.getString(0) + " \n");
-                sb.append("  " + cursor.getString(1) + " km/h  -  ");
-                sb.append(cursor.getString(2) + " km  -  ");
+                sb.append("  " + cursor.getString(1) + " km/h - ");
+                sb.append(cursor.getString(2) + " km - ");
                 sb.append("Time: " + cursor.getString(3));
 
                 results.add(sb.toString());

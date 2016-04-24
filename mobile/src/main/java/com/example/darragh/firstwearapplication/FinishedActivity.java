@@ -53,15 +53,18 @@ public class FinishedActivity extends FragmentActivity {
             double spd = extras.getDouble("speed");
             DecimalFormat speedFormat = new DecimalFormat("##.##");
             speed = speedFormat.format(spd);
-            finalSpeed.setText(speed + " km/h");
+            finalSpeed.setText("Avg. Speed: ");
+            finalSpeed.append(speed + " km/h");
 
             double dist = extras.getDouble("distance");
             DecimalFormat distFormat = new DecimalFormat("##.##");
             distance = distFormat.format(dist);
-            finalDistance.setText(distance + " km");
+            finalDistance.setText("Distance: ");
+            finalDistance.append(distance + " km");
 
             time = extras.getString("time");
-            finalTime.setText(time);
+            finalTime.setText("Time: ");
+            finalTime.append(time); 
 
             speedPlot();
         }
