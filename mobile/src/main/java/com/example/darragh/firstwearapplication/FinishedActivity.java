@@ -71,7 +71,7 @@ public class FinishedActivity extends FragmentActivity {
 
     private void speedPlot() {
 
-        LineChart lineChart = (LineChart) findViewById(R.id.plot);
+        LineChart lineChart = (LineChart) findViewById(R.id.chart);
         speedList = (ArrayList<Double>) getIntent().getSerializableExtra("speedList");
 
         ArrayList<Entry> entries = new ArrayList<>();

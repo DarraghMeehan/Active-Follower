@@ -12,7 +12,7 @@
     tools:context=".MapsActivity">
 
     <com.github.mikephil.charting.charts.LineChart
-        android:id="@+id/plot"
+        android:id="@+id/chart"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:layout_above="@+id/speed"

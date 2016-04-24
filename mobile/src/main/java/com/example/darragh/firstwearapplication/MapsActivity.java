@@ -272,8 +272,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         speed.setText(s + "km/h");
     }
 
-    // Connect to the data layer when the Activity starts
-
     //Send messages to the watch
     class SendToDataLayerThread extends Thread {
 
