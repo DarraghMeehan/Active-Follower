@@ -3,6 +3,13 @@
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <ImageView
+        android:layout_width="256dp"
+        android:layout_height="76dp"
+        android:id="@+id/imageView3"
+        android:layout_gravity="center_horizontal"
+        android:src="@+drawable/logo_name"/>
+
     <ListView
         android:id="@+id/activityListView"
         android:layout_width="match_parent"

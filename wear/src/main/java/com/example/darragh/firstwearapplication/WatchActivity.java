@@ -11,7 +11,6 @@ import android.os.Bundle;
 import android.os.SystemClock;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.wearable.activity.WearableActivity;
-import android.support.wearable.view.BoxInsetLayout;
 import android.support.wearable.view.WatchViewStub;
 import android.util.Log;
 import android.view.View;
@@ -31,18 +30,12 @@ import com.google.android.gms.wearable.NodeApi;
 import com.google.android.gms.wearable.Wearable;
 
 import java.text.DecimalFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
 public class WatchActivity extends WearableActivity implements
         GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener,
         LocationListener  {
-
-    private static final SimpleDateFormat AMBIENT_DATE_FORMAT =
-            new SimpleDateFormat("HH:mm", Locale.UK);
 
     //Location Variables
     //Tracking user location and printing the route
@@ -53,21 +46,23 @@ public class WatchActivity extends WearableActivity implements
     static double totalDist = 0;
     double totalDistance = 0;
 
-    private BoxInsetLayout mContainerView;
-    private TextView mTextView;
-    private TextView mClockView;
-    private TextView speed;
+    //Speed Variable
     double mySpeed;
-    private TextView distance;
 
+    //Allows use of Wearable API
     GoogleApiClient googleApiClient;
 
-    // Stopwatch features
-    Chronometer myChrono;
+    // Stopwatch Variables
     long timeWhenPaused = 0;
     boolean status = false;
 
+    //On-Screen Resume/Pause Button
     Button activityButton;
+
+    //On-Screen Features
+    Chronometer myChrono;
+    private TextView distance;
+    private TextView speed;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -75,6 +70,7 @@ public class WatchActivity extends WearableActivity implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_watch);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+
         final WatchViewStub stub = (WatchViewStub) findViewById(R.id.watch_view_stub);
         stub.setOnLayoutInflatedListener(new WatchViewStub.OnLayoutInflatedListener() {
             @Override
@@ -125,28 +121,6 @@ public class WatchActivity extends WearableActivity implements
         super.onStop();
     }
 
-    public class MessageReceiver extends BroadcastReceiver {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-
-            String message = intent.getStringExtra("message");
-
-            if(message.equals("Start")){
-                //Show the button
-                activityButton.setVisibility(View.VISIBLE);
-                play();
-                status = !status;
-            }
-            else if(message.equals("Pause")) {
-                pause();
-                status = !status;
-            }
-            else if(message.equals("Finish")) {
-                end();
-            }
-        }
-    }
-
     // Register as a listener when connected
     @Override
     public void onConnected(Bundle connectionHint) {
@@ -171,14 +145,34 @@ public class WatchActivity extends WearableActivity implements
     @Override
     public void onConnectionFailed(ConnectionResult connectionResult) {
 
-        //retryConnecting();
+    }
+
+    public class MessageReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+
+            String message = intent.getStringExtra("message");
+
+            if(message.equals("Start")){
+                //Show the button
+                activityButton.setVisibility(View.VISIBLE);
+                play();
+                status = !status;
+            }
+            else if(message.equals("Pause")) {
+                pause();
+                status = !status;
+            }
+            else if(message.equals("Finish")) {
+                end();
+            }
+        }
     }
 
     @Override
     public void onLocationChanged(Location location) {
 
         if (status) {
-
             //Take location & read speed info
             getSpeed(location);
 
@@ -310,36 +304,20 @@ public class WatchActivity extends WearableActivity implements
 
     @Override
     public void onEnterAmbient(Bundle ambientDetails) {
+
         super.onEnterAmbient(ambientDetails);
-        updateDisplay();
     }
 
     @Override
     public void onUpdateAmbient() {
+
         super.onUpdateAmbient();
-        updateDisplay();
     }
 
     @Override
     public void onExitAmbient() {
-        updateDisplay();
+
         super.onExitAmbient();
-    }
-
-    private void updateDisplay() {
-        if (isAmbient()) {
-            mContainerView.setBackgroundColor(getResources().getColor(android.R.color.black));
-            mTextView.setTextColor(getResources().getColor(android.R.color.white));
-            speed.setTextColor(getResources().getColor(android.R.color.white));
-            mClockView.setVisibility(View.VISIBLE);
-
-            mClockView.setText(AMBIENT_DATE_FORMAT.format(new Date()));
-        } else {
-            mContainerView.setBackground(null);
-            mTextView.setTextColor(getResources().getColor(android.R.color.black));
-            speed.setTextColor(getResources().getColor(android.R.color.black));
-            mClockView.setVisibility(View.GONE);
-        }
     }
 
     public void onDestroy() {

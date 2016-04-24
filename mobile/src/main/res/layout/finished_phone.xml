@@ -12,7 +12,7 @@
     tools:context=".MapsActivity">
 
     <com.github.mikephil.charting.charts.LineChart
-        android:id="@+id/plot"
+        android:id="@+id/chart"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:layout_above="@+id/speed"
@@ -77,4 +77,14 @@
         android:text="View Runs"
         android:layout_below="@+id/time"
         android:layout_alignParentEnd="true" />
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/imageView2"
+        android:layout_alignBottom="@+id/btnSave"
+        android:layout_alignTop="@+id/btnSave"
+        android:layout_toStartOf="@+id/btnView"
+        android:layout_toEndOf="@+id/btnSave"
+        android:src="@drawable/logo_name" />
 </RelativeLayout>

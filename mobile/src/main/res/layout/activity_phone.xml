@@ -73,4 +73,14 @@ tools:context=".MapsActivity" >
     android:layout_alignParentTop="true"
     android:onClick="onClick_Start"
     android:text="Start" />
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/imageView"
+        android:layout_above="@+id/map"
+        android:layout_alignTop="@+id/btnFinish"
+        android:layout_toEndOf="@+id/btnFinish"
+        android:layout_toStartOf="@+id/btnStart"
+        android:src="@drawable/logo_name"/>
 </RelativeLayout>

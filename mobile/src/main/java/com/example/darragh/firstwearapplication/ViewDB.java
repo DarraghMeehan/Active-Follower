@@ -32,7 +32,7 @@ public class ViewDB extends FragmentActivity{
         try {
             Log.d("viewDB", "Pre SHOW Table");
             returnedList = myDB.showTable(); //retrieve all rows from a table
-            ArrayAdapter<String> myAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, returnedList);
+            ArrayAdapter<String> myAdapter = new ArrayAdapter<>(this, R.layout.my_list, returnedList);
             activityList.setAdapter(myAdapter);
 
             activityList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
