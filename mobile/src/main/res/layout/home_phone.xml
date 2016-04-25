@@ -19,5 +19,16 @@
             android:id="@+id/welcome"
             android:gravity="center" />
 
+        <Button
+            android:layout_width="178dp"
+            android:layout_height="match_parent"
+            android:text="Check previous Activities\nHere"
+            android:id="@+id/viewDB"
+            android:onClick="onClick_ViewDB"
+            android:textSize="19dp"
+            android:textColor="@android:color/white"
+            android:background="@android:color/transparent"
+            android:textStyle="bold" />
+
     </LinearLayout>
 </FrameLayout>

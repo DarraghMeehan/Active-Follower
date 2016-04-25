@@ -71,7 +71,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     //Speed Variables
     private TextView speed;
     double mySpeed;
-    ArrayList<Double> speedList = new ArrayList<>();
+    private ArrayList<Double> speedList = new ArrayList<>();
 
     //Time Features
     Chronometer myChrono;
@@ -79,14 +79,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     boolean status = false;
 
     //Buttons
-    Button startButton;
-    Button finishButton;
+    private Button startButton;
+    private Button finishButton;
 
     //Map & Map Manipulation
     private GoogleMap map;
     private LocationManager locationManager;
     private LocationListener locationListener;
-    private boolean firstTime = false;
+    private boolean firstTime = true;
 
     //Tracking user location
     List<LatLng> routePoints = new ArrayList<>();
@@ -348,7 +348,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
 
             LatLngBounds bounds = boundsBuilder.build();
-            map.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds,12));
+            map.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds,120));
         }
         else;
     }
@@ -367,7 +367,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         myChrono.start();
 
         //Only drop a green marker at the beginning of the activity
-        if(firstTime == false){
+        if(firstTime == true){
 
             //Drop Green marker at start position
             map.setMapType(GoogleMap.MAP_TYPE_NORMAL);
@@ -379,7 +379,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     .icon(BitmapDescriptorFactory
                             .defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
             map.animateCamera(update);
-            firstTime = true;
+            firstTime = false;
         }
     }
 

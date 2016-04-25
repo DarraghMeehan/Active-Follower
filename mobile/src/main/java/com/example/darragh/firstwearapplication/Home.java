@@ -79,4 +79,10 @@ public class Home extends FragmentActivity {
             return false;
         }
     }
+
+    public void onClick_ViewDB(View v) {
+
+        Intent myIntent = new Intent(Home.this, ViewDB.class);
+        startActivity(myIntent);
+    }
 }
