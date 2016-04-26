@@ -202,7 +202,7 @@ public class WatchActivity extends WearableActivity implements
             //Print the distance information
             DecimalFormat distFormat = new DecimalFormat("##.##");
             String d = distFormat.format(totalDistance);
-            distance.setText(d + " km");
+            distance.setText(d + "\nkm");
         }
     }
 
@@ -227,7 +227,7 @@ public class WatchActivity extends WearableActivity implements
         mySpeed = location.getSpeed() * 3.6;
         DecimalFormat speedFormat = new DecimalFormat("##.##");
         String s = speedFormat.format(mySpeed);
-        speed.setText(s + "km/h");
+        speed.setText(s + "\nkm/h");
     }
 
     class SendToDataLayerThread extends Thread {
@@ -248,10 +248,10 @@ public class WatchActivity extends WearableActivity implements
                 MessageApi.SendMessageResult result =
                         Wearable.MessageApi.sendMessage(googleApiClient, node.getId(), path, message.getBytes()).await();
                 if (result.getStatus().isSuccess()) {
-                    Log.v("Watch", "Message: {" + message + "} sent to: " + node.getDisplayName());
+                    Log.w("Watch", "Message: {" + message + "} sent to: " + node.getDisplayName());
                 } else {
                     // Log an error
-                    Log.v("Watch", "ERROR: failed to send Message");
+                    Log.w("Watch", "ERROR: failed to send Message");
                 }
             }
         }
@@ -322,8 +322,9 @@ public class WatchActivity extends WearableActivity implements
     }
 
     public void onDestroy() {
-
+        //Resets Variables back to 0
         System.exit(0);
+        //Exit Safely
         super.onDestroy();
     }
 }

@@ -90,7 +90,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     //Tracking user location
     List<LatLng> routePoints = new ArrayList<>();
-    PolylineOptions options = new PolylineOptions()
+    PolylineOptions polyline = new PolylineOptions()
             .width(10)
             .color(BLUE)
             .geodesic(true);
@@ -157,8 +157,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     longitude_prev = lon;
 
                     //Print the route line on the map
-                    options.add(current);
-                    map.addPolyline(options);
+                    polyline.add(current);
+                    map.addPolyline(polyline);
                     CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(current, 17);
                     map.moveCamera(cameraUpdate);
 
@@ -348,7 +348,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
 
             LatLngBounds bounds = boundsBuilder.build();
-            map.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds,120));
+            map.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds,180));
         }
         else;
     }
@@ -373,7 +373,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             map.setMapType(GoogleMap.MAP_TYPE_NORMAL);
             LatLng startLocation = new LatLng(latitude, longitude);
             routePoints.add(startLocation);
-            options.add(startLocation);
+            polyline.add(startLocation);
             CameraUpdate update = CameraUpdateFactory.newLatLngZoom(startLocation, 17);
             map.addMarker(new MarkerOptions().position(startLocation)
                     .icon(BitmapDescriptorFactory
