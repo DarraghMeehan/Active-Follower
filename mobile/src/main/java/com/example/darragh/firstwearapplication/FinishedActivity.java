@@ -68,7 +68,6 @@ public class FinishedActivity extends FragmentActivity {
 
             speedPlot();
         }
-
         client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
     }
 

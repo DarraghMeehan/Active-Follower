@@ -44,7 +44,7 @@ public class WatchActivity extends WearableActivity implements
 
     //Distance Variables
     static double totalDist = 0;
-    double totalDistance = 0;
+    double totalDistance;
 
     //Speed Variable
     double mySpeed;
@@ -202,15 +202,16 @@ public class WatchActivity extends WearableActivity implements
             //Print the distance information
             DecimalFormat distFormat = new DecimalFormat("##.##");
             String d = distFormat.format(totalDistance);
-            distance.setText(d + " km");
+            distance.setText(d + "\nkm");
         }
     }
 
+    //Returns the distance of the activity
     private static Double getDistance(double lat1, double lng1, double lat2, double lng2){
 
         double earthRadius = 6371;
-        double dLat = Math.toRadians(lat2 - lat1);
-        double dLng = Math.toRadians(lng2 - lng1);
+        double dLat = Math.toRadians(lat2-lat1);
+        double dLng = Math.toRadians(lng2-lng1);
         double a = Math.sin(dLat/2) * Math.sin(dLat/2) +
                 Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2)) *
                         Math.sin(dLng/2) * Math.sin(dLng/2);
@@ -226,7 +227,7 @@ public class WatchActivity extends WearableActivity implements
         mySpeed = location.getSpeed() * 3.6;
         DecimalFormat speedFormat = new DecimalFormat("##.##");
         String s = speedFormat.format(mySpeed);
-        speed.setText(s + "km/h");
+        speed.setText(s + "\nkm/h");
     }
 
     class SendToDataLayerThread extends Thread {
@@ -247,10 +248,10 @@ public class WatchActivity extends WearableActivity implements
                 MessageApi.SendMessageResult result =
                         Wearable.MessageApi.sendMessage(googleApiClient, node.getId(), path, message.getBytes()).await();
                 if (result.getStatus().isSuccess()) {
-                    Log.v("Watch", "Message: {" + message + "} sent to: " + node.getDisplayName());
+                    Log.w("Watch", "Message: {" + message + "} sent to: " + node.getDisplayName());
                 } else {
                     // Log an error
-                    Log.v("Watch", "ERROR: failed to send Message");
+                    Log.w("Watch", "ERROR: failed to send Message");
                 }
             }
         }
@@ -321,7 +322,9 @@ public class WatchActivity extends WearableActivity implements
     }
 
     public void onDestroy() {
-
+        //Resets Variables back to 0
+        System.exit(0);
+        //Exit Safely
         super.onDestroy();
     }
 }
